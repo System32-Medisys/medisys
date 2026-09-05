@@ -1,0 +1,23 @@
+# Regras de negócio
+
+- **RN01:** cada usuário deverá possuir um perfil de acesso ativo;
+- **RN02:** o CPF deverá ser válido e único no sistema;
+- **RN03:** a combinação entre CRM e UF deverá ser única;
+- **RN04:** cada consulta deverá estar vinculada a um paciente e a um médico;
+- **RN05:** cada exame deverá estar vinculado a um paciente e a um tipo de exame;
+- **RN06:** somente atendentes e administradores poderão criar, reagendar ou cancelar agendamentos;
+- **RN07:** somente administradores poderão cadastrar atendentes;
+- **RN08:** pacientes poderão consultar somente os próprios agendamentos e exames;
+- **RN09:** médicos poderão consultar somente a própria agenda;
+- **RN10:** médicos poderão consultar exames apenas de pacientes vinculados aos seus atendimentos;
+- **RN11:** um médico não poderá possuir duas consultas no mesmo horário;
+- **RN12:** um paciente não poderá possuir dois agendamentos no mesmo horário;
+- **RN13:** registros não serão excluídos definitivamente, apenas desativados;
+- **RN14:** registros desativados não poderão ser usados em novos agendamentos;
+- **RN15:** consultas e exames cancelados deverão permanecer no histórico;
+- **RN16:** o administrador poderá redefinir senhas;
+- **RN17:** toda operação importante deverá registrar usuário, data e horário;
+- **RN18:** o atendente poderá registrar e corrigir resultados de exames;
+- **RN19:** o médico poderá consultar resultados, mas não poderá alterá-los;
+- **RN20:** alterações em resultados deverão preservar o valor anterior, o novo valor, a data e o responsável;
+- **RN21:** o administrador poderá registrar, corrigir e consultar todos os resultados de exames.
