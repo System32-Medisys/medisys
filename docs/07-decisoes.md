@@ -1,8 +1,6 @@
 # Decisões do projeto
 
-## Perfis definidos
-
-O sistema possui quatro perfis:
+## Perfis
 
 - Paciente;
 - Atendente;
@@ -11,22 +9,32 @@ O sistema possui quatro perfis:
 
 ## Decisões confirmadas
 
-- O paciente apenas consulta seus próprios agendamentos e exames;
-- O atendente realiza os agendamentos de consultas e exames;
-- O médico consulta somente a própria agenda;
-- O médico pode consultar exames de pacientes vinculados aos seus atendimentos;
-- O atendente registra e corrige resultados de exames;
-- Resultados corrigidos mantêm histórico;
-- Registros não são excluídos definitivamente, somente desativados;
-- O administrador possui todas as permissões e pode cadastrar atendentes;
-- O administrador pode redefinir senhas;
-- CPF, nome completo, data de nascimento e endereço são obrigatórios para pacientes;
-- CPF, nome completo, CRM, UF do CRM, data de nascimento e endereço são obrigatórios para médicos.
+- O CPF será utilizado como login;
+- A primeira senha será escolhida pelo cadastrante;
+- A senha terá no mínimo seis dígitos;
+- A conta será bloqueada após cinco tentativas incorretas;
+- O administrador redefinirá senhas manualmente;
+- A troca da senha será obrigatória no primeiro acesso;
+- O paciente apenas consultará os próprios agendamentos, exames e resultados;
+- Atendentes realizarão os agendamentos, reagendamentos e cancelamentos;
+- Cancelamentos e reagendamentos exigirão justificativa;
+- Não haverá prazo mínimo para cancelamento;
+- Horários cancelados voltarão a ficar disponíveis;
+- Faltas serão registradas como falta do paciente ou falta do médico;
+- Atendentes consultarão todos os exames e registrarão resultados;
+- Todos os médicos poderão consultar exames e resultados de todos os pacientes;
+- Médicos consultarão somente a própria agenda;
+- Registros serão desativados, nunca excluídos;
+- O administrador poderá consultar todos os dados e históricos;
+- O administrador configurará os horários de funcionamento da clínica;
+- Agendamentos em datas passadas serão impedidos;
+- O sistema manterá controles básicos de LGPD por ser um projeto acadêmico;
+- A auditoria seguirá as regras descritas em [LGPD e auditoria](09-lgpd-auditoria.md).
 
-## Pendências
+## Pendências futuras
 
-- Definir os campos obrigatórios dos atendentes e administradores;
-- Definir os dados obrigatórios de cada tipo de exame;
-- Definir políticas de recuperação de senha;
-- Definir prazos permitidos para cancelamento e reagendamento;
-- Definir por quanto tempo os registros de auditoria serão mantidos.
+- Definir o formato completo do resultado do exame;
+- Criar casos de uso e fluxos;
+- Criar o modelo do banco de dados;
+- Criar protótipos;
+- Criar casos de teste.
