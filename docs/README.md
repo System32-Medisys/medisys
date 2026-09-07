@@ -11,7 +11,9 @@ Esta pasta reúne a documentação funcional do sistema de agendamento médico u
 5. [Regras de negócio](05-regras-de-negocio.md)
 6. [Dados cadastrais](06-dados-cadastrais.md)
 7. [Decisões do projeto](07-decisoes.md)
+8. [Agendamentos e status](08-agendamentos-status.md)
+9. [LGPD e auditoria](09-lgpd-auditoria.md)
 
 ## Escopo atual
 
-O sistema atende uma clínica médica e possui quatro perfis: Paciente, Atendente, Médico e Administrador. O controle de acesso deve ser aplicado tanto na interface quanto no servidor.
+O sistema atende uma clínica médica e possui quatro perfis: Paciente, Atendente, Médico e Administrador. O controle de acesso será aplicado na interface e no servidor.
