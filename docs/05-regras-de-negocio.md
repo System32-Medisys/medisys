@@ -1,0 +1,32 @@
+# Regras de negócio
+
+- **RN01:** cada usuário deverá possuir um perfil e um status;
+- **RN02:** o CPF deverá ser válido e único;
+- **RN03:** a combinação CRM e UF deverá ser única;
+- **RN04:** a senha deverá possuir no mínimo seis dígitos;
+- **RN05:** a primeira senha será escolhida pelo cadastrante;
+- **RN06:** o usuário deverá trocar a senha no primeiro acesso;
+- **RN07:** a conta será bloqueada após cinco tentativas incorretas;
+- **RN08:** somente o administrador poderá redefinir senhas;
+- **RN09:** cada consulta deverá estar vinculada a um paciente e a um médico;
+- **RN10:** cada exame deverá estar vinculado a um paciente e a um tipo de exame;
+- **RN11:** somente atendentes e administradores poderão criar, reagendar ou cancelar agendamentos;
+- **RN12:** cancelamentos e reagendamentos exigirão justificativa;
+- **RN13:** não haverá prazo mínimo para cancelamento;
+- **RN14:** o horário cancelado deverá ficar disponível novamente;
+- **RN15:** agendamentos em datas passadas serão impedidos;
+- **RN16:** um médico não poderá possuir duas consultas no mesmo horário;
+- **RN17:** um paciente não poderá possuir dois agendamentos no mesmo horário;
+- **RN18:** pacientes consultarão somente os próprios agendamentos, exames e resultados;
+- **RN19:** médicos consultarão somente a própria agenda;
+- **RN20:** todos os médicos poderão consultar exames e resultados de todos os pacientes;
+- **RN21:** atendentes poderão consultar todos os exames;
+- **RN22:** registros serão desativados, nunca excluídos definitivamente;
+- **RN23:** registros desativados não poderão ser usados em novos agendamentos;
+- **RN24:** cancelamentos, reagendamentos e faltas permanecerão no histórico;
+- **RN25:** atendentes poderão registrar e corrigir resultados;
+- **RN26:** médicos poderão consultar resultados, mas não alterá-los;
+- **RN27:** correções de resultados preservarão o valor anterior, o novo valor, a data e o responsável;
+- **RN28:** somente administradores poderão cadastrar atendentes;
+- **RN29:** o administrador poderá consultar todos os dados e históricos;
+- **RN30:** operações importantes deverão gerar registros de auditoria.
