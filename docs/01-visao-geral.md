@@ -13,19 +13,21 @@ Processos manuais ou ferramentas separadas dificultam o controle de pacientes, m
 Centralizar em um único sistema:
 
 - Cadastro de pacientes, médicos e atendentes;
-- Agendamento de consultas entre pacientes e médicos;
-- Agendamento de exames para pacientes;
-- Registro e consulta de resultados de exames;
-- Controle de acesso conforme o perfil do usuário;
-- Histórico das operações realizadas.
+- Cadastro de tipos de exames;
+- Configuração do horário de funcionamento da clínica;
+- Agendamento, reagendamento e cancelamento de consultas;
+- Agendamento, reagendamento e cancelamento de exames;
+- Registro e consulta de resultados;
+- Controle de acesso conforme o perfil;
+- Histórico e auditoria das operações realizadas.
 
 ## Público-alvo
 
 - Clínica médica;
-- Pacientes da clínica;
+- Pacientes;
 - Atendentes;
 - Médicos;
-- Administradores do sistema.
+- Administradores.
 
 ## Objetivo geral
 
