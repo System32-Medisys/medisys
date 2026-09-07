@@ -2,41 +2,66 @@
 
 ## Paciente
 
+Pode:
+
+- Entrar utilizando CPF e senha;
 - Consultar somente os próprios agendamentos;
-- Consultar somente os próprios exames e resultados;
-- Não criar, reagendar ou cancelar agendamentos;
-- Não acessar informações de outros pacientes.
+- Consultar somente os próprios exames e resultados.
+
+Não pode:
+
+- Criar, reagendar ou cancelar agendamentos;
+- Consultar informações de outros pacientes.
 
 ## Atendente
 
+Pode:
+
 - Cadastrar, atualizar e desativar pacientes;
 - Cadastrar, atualizar e desativar médicos;
-- Cadastrar tipos de exames;
-- Agendar, reagendar e cancelar consultas entre pacientes e médicos;
+- Cadastrar e desativar tipos de exames;
+- Consultar todos os exames de pacientes;
+- Agendar, reagendar e cancelar consultas;
 - Agendar, reagendar e cancelar exames;
 - Consultar os agendamentos da clínica;
-- Registrar e corrigir resultados de exames, preservando o histórico;
-- Não excluir registros definitivamente;
-- Não cadastrar atendentes.
+- Registrar e corrigir resultados, preservando o histórico.
+
+Não pode:
+
+- Excluir registros definitivamente;
+- Cadastrar atendentes;
+- Redefinir senhas.
 
 ## Médico
 
+Pode:
+
 - Consultar somente os agendamentos nos quais seja o médico vinculado;
-- Consultar exames e resultados dos pacientes vinculados aos seus atendimentos;
-- Não consultar a agenda de outros médicos;
-- Não acessar exames de pacientes sem vínculo de atendimento;
-- Não cadastrar usuários ou realizar agendamentos.
+- Consultar exames e resultados de todos os pacientes.
+
+Não pode:
+
+- Consultar a agenda de outros médicos;
+- Criar, reagendar ou cancelar agendamentos;
+- Cadastrar usuários;
+- Registrar ou alterar resultados.
 
 ## Administrador
 
-- Possuir todas as permissões operacionais dos demais perfis;
-- Consultar todos os agendamentos e exames;
+Pode:
+
+- Executar todas as operações dos demais perfis;
 - Cadastrar, atualizar e desativar atendentes;
 - Gerenciar pacientes, médicos, especialidades e tipos de exames;
-- Registrar e corrigir resultados de exames;
+- Configurar os horários de funcionamento da clínica;
+- Registrar e corrigir resultados;
 - Redefinir senhas;
 - Gerenciar perfis e permissões;
-- Não excluir registros definitivamente.
+- Consultar todos os pacientes, médicos e atendentes;
+- Consultar todos os agendamentos, exames, históricos e dados relacionados;
+- Consultar os registros de auditoria.
+
+Não pode excluir registros definitivamente.
 
 ## Matriz resumida
 
@@ -45,9 +70,10 @@
 | Consultar os próprios agendamentos | Sim | — | Sim | Sim |
 | Consultar os próprios exames | Sim | — | — | Sim |
 | Consultar agenda da clínica | Não | Sim | Não | Sim |
-| Consultar exames dos pacientes atendidos | Não | Não | Sim | Sim |
+| Consultar todos os exames | Não | Sim | Sim | Sim |
 | Cadastrar pacientes e médicos | Não | Sim | Não | Sim |
-| Agendar consultas e exames | Não | Sim | Não | Sim |
-| Registrar resultados de exames | Não | Sim | Não | Sim |
+| Agendar, reagendar e cancelar | Não | Sim | Não | Sim |
+| Registrar resultados | Não | Sim | Não | Sim |
 | Cadastrar atendentes | Não | Não | Não | Sim |
 | Redefinir senhas | Não | Não | Não | Sim |
+| Consultar auditoria | Não | Não | Não | Sim |
