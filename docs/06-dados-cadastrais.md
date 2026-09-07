@@ -7,7 +7,15 @@ Campos obrigatórios:
 - CPF;
 - Nome completo;
 - Data de nascimento;
-- Endereço.
+- Telefone;
+- E-mail;
+- Sexo;
+- Endereço;
+- Senha.
+
+Campo opcional:
+
+- Convênio.
 
 ## Médico
 
@@ -16,11 +24,30 @@ Campos obrigatórios:
 - CPF;
 - Nome completo;
 - Número do CRM;
-- Estado de emissão do CRM;
+- UF do CRM;
 - Data de nascimento;
-- Endereço.
+- Telefone;
+- E-mail;
+- Endereço;
+- Especialidade;
+- Senha.
 
-## Estrutura recomendada para o endereço
+Campo opcional:
+
+- Dias de atendimento.
+
+## Atendente e administrador
+
+Campos obrigatórios:
+
+- CPF;
+- Nome completo;
+- Data de nascimento;
+- Telefone;
+- Endereço;
+- Senha.
+
+## Endereço
 
 - CEP;
 - Logradouro;
@@ -30,18 +57,24 @@ Campos obrigatórios:
 - Cidade;
 - Estado.
 
+## Tipo de exame
+
+- Nome;
+- Descrição;
+- Status: ativo ou inativo.
+
 ## Validações
 
 - CPF válido e único;
 - Nome completo sem números;
 - Data de nascimento válida e não futura;
-- CRM obrigatório;
+- Telefone em formato válido;
+- E-mail em formato válido;
+- CRM obrigatório para médicos;
 - Combinação CRM e UF única;
-- CEP em formato válido;
-- Campos obrigatórios não podem conter somente espaços.
+- Campos obrigatórios não podem conter somente espaços;
+- Senha com no mínimo seis dígitos.
 
 ## Autenticação
 
-O CPF poderá ser utilizado como identificador de entrada para pacientes e médicos. As senhas deverão ser armazenadas somente em formato de hash.
-
-Os campos obrigatórios dos atendentes e administradores ainda deverão ser definidos pelo grupo.
+O CPF será o login. A senha será armazenada somente em formato de hash e deverá ser alterada no primeiro acesso.
