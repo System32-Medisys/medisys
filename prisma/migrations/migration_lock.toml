@@ -1,0 +1,2 @@
+# Define o provedor usado por todas as migrations deste projeto.
+provider = "postgresql"
