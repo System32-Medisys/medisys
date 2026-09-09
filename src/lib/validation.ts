@@ -4,13 +4,18 @@ import { isValidCpf, normalizeCpf } from "./cpf";
 
 export const cpfSchema = z.string().transform(normalizeCpf).refine(isValidCpf, "CPF inválido.");
 
+// Remove a formatação antes de validar e armazenar telefones com DDD.
+export const phoneSchema = z.string()
+  .transform((value) => value.replace(/\D/g, ""))
+  .refine((value) => /^\d{10,11}$/.test(value), "Telefone deve possuir 10 ou 11 dígitos.");
+
 export const loginSchema = z.object({ cpf: cpfSchema, password: z.string().min(6) });
 
 export const userSchema = z.object({
   cpf: cpfSchema,
   fullName: z.string().trim().min(3).regex(/^[^\d]+$/, "O nome não pode conter números."),
   birthDate: z.coerce.date().refine((date) => date <= new Date(), "Data de nascimento inválida."),
-  phone: z.string().trim().min(10),
+  phone: phoneSchema,
   email: z.email().optional(),
   sex: z.string().optional(),
   healthInsurance: z.string().optional(),
