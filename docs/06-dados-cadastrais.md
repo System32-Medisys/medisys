@@ -8,13 +8,13 @@ Campos obrigatórios:
 - Nome completo;
 - Data de nascimento;
 - Telefone;
-- E-mail;
-- Sexo;
 - Endereço;
 - Senha.
 
-Campo opcional:
+Campos opcionais:
 
+- E-mail;
+- Sexo;
 - Convênio.
 
 ## Médico
@@ -68,7 +68,7 @@ Campos obrigatórios:
 - CPF válido e único;
 - Nome completo sem números;
 - Data de nascimento válida e não futura;
-- Telefone em formato válido;
+- Telefone com 10 ou 11 dígitos;
 - E-mail em formato válido;
 - CRM obrigatório para médicos;
 - Combinação CRM e UF única;

@@ -1,0 +1,216 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // O sistema usa o PostgreSQL do Supabase sem substituir a autenticação própria.
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  PACIENTE
+  ATENDENTE
+  MEDICO
+  ADMINISTRADOR
+}
+
+enum UserStatus {
+  ATIVO
+  INATIVO
+  BLOQUEADO
+}
+
+enum ConsultationStatus {
+  AGENDADA
+  CONFIRMADA
+  REALIZADA
+  CANCELADA
+  REAGENDADA
+  FALTA_PACIENTE
+  FALTA_MEDICO
+}
+
+enum ExamStatus {
+  AGENDADO
+  REALIZADO
+  RESULTADO_PENDENTE
+  RESULTADO_DISPONIVEL
+  CANCELADO
+  FALTA_PACIENTE
+}
+
+enum AuditResult {
+  SUCESSO
+  FALHA
+}
+
+model User {
+  id                   String              @id @default(cuid())
+  cpf                  String              @unique
+  fullName             String
+  birthDate            DateTime
+  phone                String
+  email                String?             @unique
+  sex                  String?
+  healthInsurance      String?
+  passwordHash         String
+  role                 Role
+  status               UserStatus          @default(ATIVO)
+  mustChangePassword   Boolean             @default(true)
+  failedLoginCount     Int                 @default(0)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  address              Address?
+  doctor               DoctorProfile?
+  patientConsultations Consultation[]      @relation("PatientConsultations")
+  doctorConsultations  Consultation[]      @relation("DoctorConsultations")
+  createdConsultations Consultation[]      @relation("ConsultationCreator")
+  patientExams         ExamAppointment[]   @relation("PatientExams")
+  createdExams         ExamAppointment[]   @relation("ExamCreator")
+  resultVersions       ExamResultVersion[]
+  auditLogs            AuditLog[]
+}
+
+model Address {
+  id           String  @id @default(cuid())
+  zipCode      String
+  street       String
+  number       String
+  complement   String?
+  neighborhood String
+  city         String
+  state        String
+  userId       String  @unique
+  user         User    @relation(fields: [userId], references: [id])
+}
+
+model DoctorProfile {
+  id          String            @id @default(cuid())
+  crm         String
+  crmState    String
+  serviceDays String?
+  userId      String            @unique
+  user        User              @relation(fields: [userId], references: [id])
+  specialties DoctorSpecialty[]
+
+  @@unique([crm, crmState])
+}
+
+model Specialty {
+  id      String            @id @default(cuid())
+  name    String            @unique
+  active  Boolean           @default(true)
+  doctors DoctorSpecialty[]
+}
+
+model DoctorSpecialty {
+  doctorId    String
+  specialtyId String
+  doctor      DoctorProfile @relation(fields: [doctorId], references: [id])
+  specialty   Specialty     @relation(fields: [specialtyId], references: [id])
+
+  @@id([doctorId, specialtyId])
+}
+
+model ExamType {
+  id          String            @id @default(cuid())
+  name        String            @unique
+  description String
+  active      Boolean           @default(true)
+  exams       ExamAppointment[]
+}
+
+model Consultation {
+  id            String               @id @default(cuid())
+  scheduledAt   DateTime
+  status        ConsultationStatus   @default(AGENDADA)
+  justification String?
+  previousDate  DateTime?
+  patientId     String
+  doctorId      String
+  createdById   String
+  patient       User                 @relation("PatientConsultations", fields: [patientId], references: [id])
+  doctor        User                 @relation("DoctorConsultations", fields: [doctorId], references: [id])
+  createdBy     User                 @relation("ConsultationCreator", fields: [createdById], references: [id])
+  history       AppointmentHistory[]
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  @@index([doctorId, scheduledAt])
+  @@index([patientId, scheduledAt])
+}
+
+model ExamAppointment {
+  id            String              @id @default(cuid())
+  scheduledAt   DateTime
+  status        ExamStatus          @default(AGENDADO)
+  justification String?
+  previousDate  DateTime?
+  patientId     String
+  examTypeId    String
+  createdById   String
+  patient       User                @relation("PatientExams", fields: [patientId], references: [id])
+  examType      ExamType            @relation(fields: [examTypeId], references: [id])
+  createdBy     User                @relation("ExamCreator", fields: [createdById], references: [id])
+  results       ExamResultVersion[]
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@index([patientId, scheduledAt])
+}
+
+model ExamResultVersion {
+  id        String          @id @default(cuid())
+  content   String
+  version   Int
+  examId    String
+  authorId  String
+  exam      ExamAppointment @relation(fields: [examId], references: [id])
+  author    User            @relation(fields: [authorId], references: [id])
+  createdAt DateTime        @default(now())
+
+  @@unique([examId, version])
+}
+
+model AppointmentHistory {
+  id             String       @id @default(cuid())
+  consultationId String
+  previousStatus String
+  newStatus      String
+  previousDate   DateTime?
+  newDate        DateTime?
+  justification  String?
+  changedById    String
+  createdAt      DateTime     @default(now())
+  consultation   Consultation @relation(fields: [consultationId], references: [id])
+}
+
+model ClinicHours {
+  id          String  @id @default(cuid())
+  weekday     Int     @unique
+  opensAt     String
+  closesAt    String
+  slotMinutes Int     @default(30)
+  active      Boolean @default(true)
+}
+
+model AuditLog {
+  id            String      @id @default(cuid())
+  actorId       String?
+  actorRole     Role?
+  action        String
+  entityType    String?
+  entityId      String?
+  patientId     String?
+  result        AuditResult
+  justification String?
+  beforeData    String?
+  afterData     String?
+  createdAt     DateTime    @default(now())
+  actor         User?       @relation(fields: [actorId], references: [id])
+
+  @@index([actorId, action, createdAt])
+  @@index([patientId, createdAt])
+}
