@@ -1,64 +1,35 @@
 # Base de implementação
 
-## Tecnologias iniciais
-
-- Next.js com App Router;
-- React;
-- TypeScript;
-- CSS;
-- PostgreSQL hospedado no Supabase;
-- Prisma ORM;
-- Zod para validação;
-- bcrypt para hash de senhas;
-- JWT armazenado em cookie HTTP-only para sessão.
+## Tecnologias
+Next.js, React, TypeScript, CSS, PostgreSQL do Supabase, Prisma, Zod, bcrypt e JWT em cookie HTTP-only.
 
 ## Estrutura
-
 - `src/app`: páginas e layout;
 - `src/app/api`: rotas da API;
-- `prisma`: schema, migration inicial e seed do banco de dados;
-- `docs`: documentação do projeto.
+- `prisma`: modelo, migrações e seed;
+- `docs`: documentação.
 
-## Como executar
-
-1. Instale o Node.js 20.9 ou superior.
-2. Clone o repositório.
-3. Entre na pasta do projeto.
-4. Execute `npm install`.
-5. Execute `npm run dev`.
-6. Abra `http://localhost:3000`.
-
-## Rotas disponíveis
-
-- `/login`: autenticação por CPF e senha;
-- `/trocar-senha`: troca obrigatória da senha inicial;
-- `/dashboard`: painel protegido por autenticação;
-- `/api/health`: verificação da aplicação e do banco;
-- `/api/users`: consulta e cadastro de usuários;
-- `/api/consultations`: consulta e agendamento de consultas;
-- `/api/exams`: consulta e agendamento de exames;
-- `/api/exams/[id]/results`: inclusão e correção versionada de resultados;
-- `/api/exam-types`: consulta e cadastro de tipos de exame;
-- `/api/audit`: consulta dos registros de auditoria pelo administrador.
-
-## Banco de dados
-
-1. Crie um projeto no Supabase;
-2. No painel do projeto, abra **Connect** e copie as URLs de conexão;
+## Execução
+1. Instale Node.js 20.9 ou superior;
+2. Clone o repositório;
 3. Copie `.env.example` para `.env`;
-4. Preencha `DATABASE_URL` com o Transaction pooler do Supabase;
-5. Preencha `DIRECT_URL` com a conexão direta ou o Session pooler;
-6. Execute `npm run db:deploy` para aplicar as migrations existentes;
-7. Execute `npm run db:seed` para criar os dados iniciais.
+4. Preencha `DATABASE_URL`, `DIRECT_URL` e `SESSION_SECRET`;
+5. Execute `npm install`;
+6. Execute `npx prisma generate`;
+7. Execute `npm run dev`;
+8. Abra `http://localhost:3000`.
 
-O Supabase é utilizado somente como banco PostgreSQL. A autenticação por CPF e senha, as sessões JWT e as permissões continuam sendo controladas pelo Medisys.
+## Rotas principais
+`/login`, `/trocar-senha`, `/dashboard`, `/api/health`, `/api/users`, `/api/consultations`, `/api/exams`, `/api/exams/[id]/results`, `/api/exam-types` e `/api/audit`.
 
-O seed cria um administrador acadêmico de demonstração. A senha deve ser trocada no primeiro acesso e os dados não devem ser utilizados em produção.
+## Banco
+O sistema utiliza PostgreSQL do Supabase por meio do Prisma. O banco existente será atualizado por migração, sem recriação completa.
+
+O seed já cria o primeiro administrador acadêmico, com troca obrigatória da senha inicial.
 
 ## Próximos passos
-
-- Criar telas completas para os cadastros e agendamentos;
-- Implementar atualização, desativação, reagendamento e cancelamento nas rotas;
-- Configurar os horários de funcionamento da clínica;
-- Ampliar os testes unitários e adicionar testes de integração;
-- Migrar o banco para o SGBD escolhido para produção.
+- Criar e validar a migração;
+- Implementar pesquisas e mensagens;
+- Completar desativação, reagendamento e cancelamento;
+- Implementar arquivo opcional do resultado;
+- Ampliar os testes.
