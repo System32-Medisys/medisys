@@ -2,15 +2,14 @@
 
 ## Problema
 
-Muitos hospitais, clínicas e consultórios ainda dependem de processos manuais ou ferramentas separadas para organizar pacientes, médicos, horários e consultas. Essa falta de centralização pode gerar conflitos de agenda, demora no atendimento, perda de informações e falhas de comunicação entre pacientes e profissionais.
+Clínicas médicas podem enfrentar conflitos de agenda, demora no atendimento e perda de informações ao controlar pacientes, médicos, consultas e exames de forma manual ou em ferramentas separadas.
 
 ## Solução proposta
 
-Criar um sistema web funcional, intuitivo e prático que permita gerenciar as agendas médicas e o relacionamento entre pacientes, recepção, médicos e administradores.
+Criar um sistema web simples para centralizar cadastros, agendamentos, exames e resultados.
 
 ## Público-alvo principal
 
-- Hospitais;
 - Clínicas médicas;
 - Consultórios médicos.
 
@@ -18,16 +17,16 @@ Criar um sistema web funcional, intuitivo e prático que permita gerenciar as ag
 
 ### Paciente
 
-Consulta horários, agenda, acompanha, confirma ou cancela consultas.
+Consulta somente os próprios agendamentos, exames e resultados.
 
-### Secretaria ou recepção
+### Atendente
 
-Cadastra pacientes, consulta horários e gerencia agendamentos.
+Cadastra pacientes e médicos, administra consultas e exames e registra resultados.
 
 ### Médico
 
-Visualiza sua agenda e acompanha as consultas marcadas.
+Consulta a própria agenda e os exames e resultados de todos os pacientes.
 
 ### Administrador
 
-Gerencia usuários, médicos, especialidades e configurações do sistema.
+Possui acesso geral, cadastra atendentes, configura horários, redefine senhas, desbloqueia contas e consulta a auditoria.
