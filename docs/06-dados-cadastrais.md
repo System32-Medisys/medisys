@@ -1,80 +1,38 @@
 # Dados cadastrais
 
 ## Paciente
+Obrigatórios: CPF, nome completo, data de nascimento, telefone, endereço e senha.
 
-Campos obrigatórios:
-
-- CPF;
-- Nome completo;
-- Data de nascimento;
-- Telefone;
-- Endereço;
-- Senha.
-
-Campos opcionais:
-
-- E-mail;
-- Sexo;
-- Convênio.
+Opcionais: e-mail, sexo e convênio.
 
 ## Médico
+Obrigatórios: CPF, nome completo, CRM, UF do CRM, data de nascimento, telefone, e-mail, endereço, especialidade e senha.
 
-Campos obrigatórios:
-
-- CPF;
-- Nome completo;
-- Número do CRM;
-- UF do CRM;
-- Data de nascimento;
-- Telefone;
-- E-mail;
-- Endereço;
-- Especialidade;
-- Senha.
-
-Campo opcional:
-
-- Dias de atendimento.
+Opcional: dias de atendimento.
 
 ## Atendente e administrador
-
-Campos obrigatórios:
-
-- CPF;
-- Nome completo;
-- Data de nascimento;
-- Telefone;
-- Endereço;
-- Senha.
+Obrigatórios: CPF, nome completo, data de nascimento, telefone, endereço e senha.
 
 ## Endereço
-
-- CEP;
-- Logradouro;
-- Número;
-- Complemento, opcional;
-- Bairro;
-- Cidade;
-- Estado.
+CEP, logradouro, número, bairro, cidade e estado. Complemento é opcional.
 
 ## Tipo de exame
+Nome, descrição e status ativo ou inativo.
 
-- Nome;
+## Resultado de exame
 - Descrição;
-- Status: ativo ou inativo.
+- Data do resultado;
+- Usuário que registrou;
+- Arquivo opcional;
+- Número da versão.
 
 ## Validações
-
 - CPF válido e único;
-- Nome completo sem números;
-- Data de nascimento válida e não futura;
+- CRM e UF únicos em conjunto;
+- Datas válidas;
 - Telefone com 10 ou 11 dígitos;
-- E-mail em formato válido;
-- CRM obrigatório para médicos;
-- Combinação CRM e UF única;
-- Campos obrigatórios não podem conter somente espaços;
+- E-mail válido;
+- Campos obrigatórios preenchidos;
 - Senha com no mínimo seis dígitos.
 
-## Autenticação
-
-O CPF será o login. A senha será armazenada somente em formato de hash e deverá ser alterada no primeiro acesso.
+O CPF será o login. A senha será armazenada como hash e alterada no primeiro acesso.
