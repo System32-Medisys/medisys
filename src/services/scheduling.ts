@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { AppError } from "@/lib/http";
 
 const inactiveConsultations = [ConsultationStatus.CANCELADA, ConsultationStatus.REAGENDADA];
-const inactiveExams = [ExamStatus.CANCELADO];
+const inactiveExams = [ExamStatus.CANCELADO, ExamStatus.REAGENDADO];
 
 export async function createConsultation(input: {
   patientId: string; doctorId: string; scheduledAt: Date; actorId: string; actorRole: Role;
