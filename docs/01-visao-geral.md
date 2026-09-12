@@ -2,32 +2,28 @@
 
 ## Software House
 
-A **System32** é voltada ao desenvolvimento de sistemas gerenciais para hospitais, clínicas e consultórios que necessitam de soluções funcionais, intuitivas e práticas para o relacionamento entre paciente e médico.
-
-## Produto
-
-O **Medisys** é um sistema web para uma clínica médica, desenvolvido pela Software House System32.
+A **System32** desenvolve o **Medisys**, um sistema web acadêmico para gestão de uma clínica médica.
 
 ## Problema
 
-Processos manuais ou ferramentas separadas dificultam o controle de pacientes, médicos, consultas e exames. Isso pode gerar conflitos de horários, demora no atendimento, perda de informações e acesso indevido a dados pessoais.
+Processos manuais ou ferramentas separadas dificultam o controle de pacientes, médicos, consultas e exames. Isso pode causar conflitos de horário, demora no atendimento e perda de informações.
 
 ## Solução proposta
 
 Centralizar em um único sistema:
 
-- Cadastro de pacientes, médicos e atendentes;
-- Cadastro de tipos de exames;
+- Cadastro e desativação de pacientes, médicos e atendentes;
+- Cadastro e desativação de tipos de exames;
 - Configuração do horário de funcionamento da clínica;
-- Agendamento, reagendamento e cancelamento de consultas;
-- Agendamento, reagendamento e cancelamento de exames;
-- Registro e consulta de resultados;
-- Controle de acesso conforme o perfil;
-- Histórico e auditoria das operações realizadas.
+- Agendamento, reagendamento e cancelamento de consultas e exames;
+- Registro e consulta de resultados de exames;
+- Pesquisas e filtros;
+- Controle de acesso por perfil;
+- Histórico e auditoria das operações.
 
 ## Público-alvo
 
-- Clínica médica;
+- Clínicas médicas;
 - Pacientes;
 - Atendentes;
 - Médicos;
@@ -35,13 +31,10 @@ Centralizar em um único sistema:
 
 ## Objetivo geral
 
-Organizar os atendimentos da clínica e permitir que cada usuário acesse somente as informações e funcionalidades autorizadas.
+Organizar os atendimentos da clínica e permitir que cada usuário acesse apenas as informações e funcionalidades autorizadas.
 
-## Objetivos específicos
+## Escopo do MVP
 
-- Diminuir conflitos de horários;
-- Facilitar o agendamento e o cancelamento de consultas;
-- Melhorar a organização das agendas médicas;
-- Centralizar informações importantes;
-- Oferecer uma interface simples e intuitiva;
-- Registrar o histórico de agendamentos.
+O MVP deverá permitir autenticação, cadastros básicos, desativação de registros, agendamentos, reagendamentos, cancelamentos, controle de status, resultados de exames, pesquisas, mensagens ao usuário e auditoria.
+
+O detalhamento está em [Escopo do MVP](10-escopo-mvp.md).
