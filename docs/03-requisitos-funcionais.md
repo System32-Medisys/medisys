@@ -1,67 +1,63 @@
 # Requisitos funcionais
 
 ## Autenticação
-
-- **RF01:** permitir autenticação utilizando CPF e senha;
-- **RF02:** identificar o perfil do usuário autenticado;
-- **RF03:** autorizar cada funcionalidade conforme o perfil;
-- **RF04:** exigir troca da senha no primeiro acesso;
-- **RF05:** bloquear a conta após cinco tentativas incorretas;
-- **RF06:** permitir que o administrador redefina senhas manualmente;
-- **RF07:** permitir o encerramento seguro da sessão.
+- **RF01:** autenticar com CPF e senha;
+- **RF02:** autorizar funcionalidades conforme um dos quatro perfis fixos;
+- **RF03:** exigir troca da senha no primeiro acesso;
+- **RF04:** bloquear após cinco tentativas incorretas;
+- **RF05:** permitir somente ao administrador redefinir senhas e desbloquear contas;
+- **RF06:** zerar as tentativas após desbloqueio e permitir encerrar a sessão.
 
 ## Paciente
-
-- **RF08:** permitir a consulta somente dos próprios agendamentos;
-- **RF09:** permitir a consulta somente dos próprios exames e resultados;
-- **RF10:** impedir o acesso a informações de outros pacientes;
-- **RF11:** impedir que o paciente crie, reagende ou cancele agendamentos.
+- **RF07:** consultar somente os próprios agendamentos, exames e resultados;
+- **RF08:** impedir que crie, reagende ou cancele agendamentos.
 
 ## Atendente
-
-- **RF12:** permitir cadastrar, atualizar e desativar pacientes;
-- **RF13:** permitir cadastrar, atualizar e desativar médicos;
-- **RF14:** permitir cadastrar e desativar tipos de exames;
-- **RF15:** permitir consultar todos os exames de pacientes;
-- **RF16:** permitir agendar consultas entre pacientes e médicos;
-- **RF17:** permitir agendar exames para pacientes;
-- **RF18:** permitir consultar os agendamentos da clínica;
-- **RF19:** permitir reagendar e cancelar consultas e exames mediante justificativa;
-- **RF20:** permitir registrar resultados de exames;
-- **RF21:** permitir corrigir resultados preservando o histórico;
-- **RF22:** impedir a exclusão definitiva de registros.
+- **RF09:** cadastrar, atualizar e desativar pacientes e médicos;
+- **RF10:** cadastrar e desativar tipos de exames;
+- **RF11:** agendar, reagendar e cancelar consultas e exames com justificativa;
+- **RF12:** consultar todos os agendamentos e exames;
+- **RF13:** registrar e corrigir resultados preservando versões;
+- **RF14:** impedir exclusão definitiva.
 
 ## Médico
-
-- **RF23:** permitir consultar somente os agendamentos vinculados ao próprio cadastro;
-- **RF24:** impedir a consulta da agenda de outros médicos;
-- **RF25:** permitir consultar exames e resultados de todos os pacientes;
-- **RF26:** impedir o registro ou a alteração de resultados pelo médico.
+- **RF15:** consultar somente a própria agenda;
+- **RF16:** consultar exames e resultados de todos os pacientes;
+- **RF17:** impedir alteração de resultados.
 
 ## Administrador
+- **RF18:** executar operações dos demais perfis;
+- **RF19:** cadastrar, atualizar e desativar atendentes;
+- **RF20:** gerenciar especialidades, tipos de exames e horários da clínica;
+- **RF21:** consultar todos os dados, históricos e auditoria;
+- **RF22:** redefinir senhas e desbloquear contas.
 
-- **RF27:** permitir executar as operações dos demais perfis;
-- **RF28:** permitir cadastrar, atualizar e desativar atendentes;
-- **RF29:** permitir gerenciar especialidades e tipos de exames;
-- **RF30:** permitir configurar os horários de funcionamento da clínica;
-- **RF31:** permitir consultar todos os usuários, agendamentos, exames e históricos;
-- **RF32:** permitir gerenciar perfis e permissões;
-- **RF33:** permitir consultar os registros de auditoria.
+## Agenda
+- **RF23:** impedir datas passadas e conflitos do médico ou paciente;
+- **RF24:** liberar horário cancelado ou reagendado;
+- **RF25:** criar novo agendamento relacionado ao anterior no reagendamento;
+- **RF26:** preservar datas, status, justificativa e responsável;
+- **RF27:** validar as transições permitidas de status.
 
-## Agenda e histórico
+## Resultados
+- **RF28:** registrar descrição, data, responsável e arquivo opcional;
+- **RF29:** criar nova versão a cada correção;
+- **RF30:** permitir acesso às versões para perfis autorizados.
 
-- **RF34:** impedir agendamentos em datas passadas;
-- **RF35:** impedir conflitos de horário do médico;
-- **RF36:** impedir conflitos de horário do paciente;
-- **RF37:** tornar disponível o horário de um agendamento cancelado;
-- **RF38:** manter o histórico de cancelamentos, reagendamentos e faltas;
-- **RF39:** registrar a justificativa de cancelamentos e reagendamentos.
+## Pesquisas
+- **RF31:** pesquisar pacientes por nome ou CPF;
+- **RF32:** pesquisar médicos por nome, CRM ou especialidade;
+- **RF33:** filtrar agendamentos por data, paciente, médico e status;
+- **RF34:** filtrar exames por paciente, tipo, data e status.
+
+## Mensagens
+- **RF35:** informar acesso negado;
+- **RF36:** informar campos inválidos;
+- **RF37:** informar CPF ou CRM duplicado;
+- **RF38:** informar conflito de horário;
+- **RF39:** confirmar cadastro realizado.
 
 ## Auditoria
-
-- **RF40:** registrar logins, falhas de login, bloqueios e desbloqueios;
-- **RF41:** registrar cadastros, alterações e desativações;
-- **RF42:** registrar agendamentos, cancelamentos, reagendamentos e mudanças de status;
-- **RF43:** registrar inclusão, correção e visualização de resultados;
-- **RF44:** registrar alterações de perfil, permissões e senhas;
-- **RF45:** permitir que o administrador filtre a auditoria por usuário, paciente, ação e período.
+- **RF40:** registrar logins, falhas, bloqueios, desbloqueios e redefinições;
+- **RF41:** registrar cadastros, alterações, desativações, agendamentos, status e resultados;
+- **RF42:** filtrar auditoria por usuário, paciente, ação e período.
