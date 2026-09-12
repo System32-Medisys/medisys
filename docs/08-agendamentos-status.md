@@ -1,56 +1,30 @@
 # Agendamentos e status
 
-## Consulta médica
+## Consulta
+Status: **AGENDADA**, **CONFIRMADA**, **REALIZADA**, **CANCELADA**, **REAGENDADA**, **FALTA_PACIENTE** e **FALTA_MEDICO**.
 
-Campos:
-
-- Data;
-- Hora;
-- Paciente;
-- Médico;
-- Status;
-- Atendente responsável;
-- Justificativa para cancelamento ou reagendamento.
-
-Status:
-
-- **AGENDADA**
-- **CONFIRMADA**
-- **REALIZADA**
-- **CANCELADA**
-- **REAGENDADA**
-- **FALTA_PACIENTE**
-- **FALTA_MEDICO**
+Transições:
+- AGENDADA → CONFIRMADA, CANCELADA, REAGENDADA, FALTA_PACIENTE ou FALTA_MEDICO;
+- CONFIRMADA → REALIZADA, CANCELADA, REAGENDADA, FALTA_PACIENTE ou FALTA_MEDICO.
 
 ## Exame
+Status: **AGENDADO**, **REALIZADO**, **RESULTADO_PENDENTE**, **RESULTADO_DISPONIVEL**, **CANCELADO**, **REAGENDADO** e **FALTA_PACIENTE**.
 
-Campos:
+Transições:
+- AGENDADO → REALIZADO, CANCELADO, REAGENDADO ou FALTA_PACIENTE;
+- REALIZADO → RESULTADO_PENDENTE;
+- RESULTADO_PENDENTE → RESULTADO_DISPONIVEL.
 
-- Data;
-- Hora;
-- Paciente;
-- Tipo de exame;
-- Status;
-- Atendente responsável;
-- Justificativa para cancelamento ou reagendamento.
-
-Status:
-
-- **AGENDADO**
-- **REALIZADO**
-- **RESULTADO_PENDENTE**
-- **RESULTADO_DISPONIVEL**
-- **CANCELADO**
-- **FALTA_PACIENTE**
+## Reagendamento
+- Registro anterior recebe status de reagendamento;
+- Novo agendamento é criado e relacionado ao anterior;
+- Datas, justificativa, responsável e horário da alteração são preservados;
+- Horário anterior volta a ficar disponível.
 
 ## Regras
-
-- Somente atendentes e administradores poderão agendar, reagendar ou cancelar;
-- Cancelamentos e reagendamentos exigirão justificativa;
-- Não haverá prazo mínimo para cancelamento;
-- Horários cancelados ficarão disponíveis novamente;
-- O sistema impedirá agendamentos em datas passadas;
-- O sistema impedirá conflitos de horário do paciente e do médico;
-- Agendamentos realizados permanecerão no histórico;
-- O reagendamento preservará a data e o horário anteriores;
-- Uma consulta realizada não poderá voltar para agendada.
+- Somente atendentes e administradores podem alterar;
+- Cancelamento e reagendamento exigem justificativa;
+- Não há prazo mínimo;
+- Datas passadas e conflitos são impedidos;
+- Estados finais não voltam a estados anteriores;
+- Registros concluídos permanecem no histórico.
