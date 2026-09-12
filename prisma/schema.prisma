@@ -93,6 +93,7 @@ model Consultation {
   scheduledAt DateTime
   status ConsultationStatus @default(AGENDADA)
   justification String?
+  previousDate DateTime?
   patientId String
   doctorId String
   createdById String
@@ -114,6 +115,7 @@ model ExamAppointment {
   scheduledAt DateTime
   status ExamStatus @default(AGENDADO)
   justification String?
+  previousDate DateTime?
   patientId String
   examTypeId String
   createdById String
@@ -133,7 +135,7 @@ model ExamAppointment {
 model ExamResultVersion {
   id String @id @default(cuid())
   content String
-  resultDate DateTime
+  resultDate DateTime @default(now())
   fileUrl String?
   version Int
   examId String
@@ -175,6 +177,7 @@ model ClinicHours {
   weekday Int @unique
   opensAt String
   closesAt String
+  slotMinutes Int @default(30)
   active Boolean @default(true)
 }
 
