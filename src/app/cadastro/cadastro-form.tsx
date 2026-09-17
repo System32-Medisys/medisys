@@ -146,7 +146,7 @@ export function CadastroForm({
         text: `${personLabel.charAt(0).toUpperCase() + personLabel.slice(1)} cadastrado com sucesso.`,
       });
       window.setTimeout(() => {
-        router.push(personType === PERSON_TYPE.PATIENT ? "/pacientes" : "/medicos");
+        router.push(destination);
         router.refresh();
       }, 900);
     } catch {
