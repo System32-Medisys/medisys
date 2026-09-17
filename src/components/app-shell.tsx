@@ -18,6 +18,7 @@ const navigation: NavigationItem[] = [
   { href: "/exames", label: "Exames e resultados", shortLabel: "EX", roles: allRoles },
   { href: "/pacientes", label: "Pacientes", shortLabel: "PA", roles: staffRoles },
   { href: "/medicos", label: "Médicos", shortLabel: "ME", roles: staffRoles },
+  { href: "/cadastro", label: "Cadastrar pessoas", shortLabel: "CP", roles: staffRoles },
   { href: "/atendentes", label: "Atendentes", shortLabel: "AT", roles: [Role.ADMINISTRADOR] },
   { href: "/tipos-exames", label: "Tipos de exames", shortLabel: "TE", roles: staffRoles },
   { href: "/auditoria", label: "Auditoria", shortLabel: "AU", roles: [Role.ADMINISTRADOR] },
