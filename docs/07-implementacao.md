@@ -20,7 +20,15 @@ Next.js, React, TypeScript, CSS, PostgreSQL do Supabase, Prisma, Zod, bcrypt e J
 8. Abra `http://localhost:3000`.
 
 ## Rotas principais
-`/login`, `/trocar-senha`, `/dashboard`, `/api/health`, `/api/users`, `/api/consultations`, `/api/exams`, `/api/exams/[id]/results`, `/api/exam-types` e `/api/audit`.
+`/login`, `/trocar-senha`, `/dashboard`, `/consultas`, `/exames`, `/pacientes`, `/medicos`, `/atendentes`, `/tipos-exames`, `/auditoria`, `/configuracoes`, `/api/health`, `/api/users`, `/api/consultations`, `/api/exams`, `/api/exams/[id]/results`, `/api/exam-types` e `/api/audit`.
+
+## Navegação
+- O menu autenticado mostra apenas os módulos permitidos para o perfil conectado;
+- Pacientes acessam as próprias consultas, exames e resultados;
+- Médicos acessam a própria agenda e os exames e resultados;
+- Atendentes acessam consultas, exames, pacientes, médicos e tipos de exames;
+- Administradores também acessam atendentes, auditoria e configurações;
+- As permissões continuam sendo verificadas no servidor, independentemente da visibilidade dos botões.
 
 ## Banco
 O sistema utiliza PostgreSQL do Supabase por meio do Prisma. O banco existente será atualizado por migração, sem recriação completa.

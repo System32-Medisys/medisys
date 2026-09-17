@@ -67,6 +67,14 @@ export async function requireSession(options?: { allowPasswordChange?: boolean }
 export async function requirePageSession() {
   const session = await getSession();
   if (!session) redirect("/login");
-  if (session.mustChangePassword) redirect("/trocar-senha");
+  const user = await db.user.findUnique({ where: { id: session.userId } });
+  if (!user || user.status !== "ATIVO") redirect("/login");
+  if (user.mustChangePassword) redirect("/trocar-senha");
+  return { ...session, mustChangePassword: user.mustChangePassword, user };
+}
+
+export async function requirePageRole(allowed: readonly Role[]) {
+  const session = await requirePageSession();
+  if (!allowed.includes(session.role)) redirect("/dashboard");
   return session;
 }
