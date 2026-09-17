@@ -6,6 +6,17 @@
   padding: clamp(20px, 4vw, 32px);
 }
 
+.requiredLegend {
+  color: var(--muted);
+  margin: 0 0 18px;
+  text-align: right;
+}
+
+.required {
+  color: #b42318;
+  font-weight: 700;
+}
+
 .typeSelector {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -67,6 +78,22 @@
   min-width: 0;
   padding: 13px;
   text-transform: none;
+}
+
+.grid input[aria-invalid="true"],
+.grid select[aria-invalid="true"] {
+  border-color: #b42318;
+}
+
+.grid input[aria-invalid="true"]:focus,
+.grid select[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px #b4231824;
+}
+
+.fieldError {
+  color: #b42318;
+  font-size: 0.82rem;
+  font-weight: 400;
 }
 
 .grid input:focus,
