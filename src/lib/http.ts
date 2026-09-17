@@ -66,17 +66,14 @@ export function apiError(error: unknown) {
         );
       }
       return NextResponse.json(
-        { error: "Já existe um cadastro com estes dados." },
+        { error: "Já existe um registro com estes dados." },
         { status: 409 },
       );
     }
 
     if (error.code === "P2003") {
       return NextResponse.json(
-        {
-          error: "A especialidade selecionada não está mais disponível.",
-          fields: { specialtyIds: ["Selecione uma especialidade disponível."] },
-        },
+        { error: "Um dos registros relacionados não está mais disponível." },
         { status: 400 },
       );
     }
@@ -88,7 +85,7 @@ export function apiError(error: unknown) {
 
   console.error(error);
   return NextResponse.json(
-    { error: "Não foi possível realizar o cadastro. Tente novamente." },
+    { error: "Não foi possível concluir a operação. Tente novamente." },
     { status: 500 },
   );
 }
