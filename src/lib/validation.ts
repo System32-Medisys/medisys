@@ -35,7 +35,7 @@ export const userSchema = z.object({
     .trim()
     .min(3, "O nome deve possuir pelo menos 3 caracteres.")
     .regex(/^[^\d]+$/, "O nome não pode conter números."),
-  birthDate: z.coerce.date("Informe uma data de nascimento válida.")
+  birthDate: z.coerce.date({ error: "Informe uma data de nascimento válida." })
     .refine((date) => date <= new Date(), "A data de nascimento não pode estar no futuro."),
   phone: phoneSchema,
   email: z.string().email("Informe um endereço de e-mail válido.").optional(),
