@@ -1,11 +1,15 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { Role } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import styles from "./cadastro.module.css";
 
-type PersonType = typeof Role.PACIENTE | typeof Role.MEDICO;
+type PersonType = "PACIENTE" | "MEDICO";
+
+const PERSON_TYPE = {
+  PATIENT: "PACIENTE" as const,
+  DOCTOR: "MEDICO" as const,
+};
 type SpecialtyOption = { id: string; name: string };
 
 function onlyDigits(value: string, limit: number) {
@@ -81,14 +85,14 @@ export function CadastroForm({
         city: String(form.get("city") ?? "").trim(),
         state: String(form.get("state") ?? "").trim().toUpperCase(),
       },
-      crm: personType === Role.MEDICO ? optional("crm") : undefined,
-      crmState: personType === Role.MEDICO
+      crm: personType === PERSON_TYPE.DOCTOR ? optional("crm") : undefined,
+      crmState: personType === PERSON_TYPE.DOCTOR
         ? String(form.get("crmState") ?? "").toUpperCase()
         : undefined,
-      specialtyIds: personType === Role.MEDICO
+      specialtyIds: personType === PERSON_TYPE.DOCTOR
         ? [String(form.get("specialtyId") ?? "")]
         : undefined,
-      serviceDays: personType === Role.MEDICO ? optional("serviceDays") : undefined,
+      serviceDays: personType === PERSON_TYPE.DOCTOR ? optional("serviceDays") : undefined,
     };
 
     try {
@@ -108,7 +112,7 @@ export function CadastroForm({
       }
 
       setMessage({ type: "success", text: "Cadastro realizado com sucesso." });
-      router.push(personType === Role.PACIENTE ? "/pacientes" : "/medicos");
+      router.push(personType === PERSON_TYPE.PATIENT ? "/pacientes" : "/medicos");
       router.refresh();
     } catch {
       setMessage({
@@ -120,15 +124,15 @@ export function CadastroForm({
     }
   }
 
-  const destination = personType === Role.PACIENTE ? "/pacientes" : "/medicos";
+  const destination = personType === PERSON_TYPE.PATIENT ? "/pacientes" : "/medicos";
 
   return (
     <section className={styles.card}>
       <div className={styles.typeSelector} aria-label="Tipo de cadastro">
         <button
-          className={personType === Role.PACIENTE ? styles.activeType : styles.inactiveType}
+          className={personType === PERSON_TYPE.PATIENT ? styles.activeType : styles.inactiveType}
           onClick={() => {
-            setPersonType(Role.PACIENTE);
+            setPersonType(PERSON_TYPE.PATIENT);
             setMessage(null);
           }}
           type="button"
@@ -136,9 +140,9 @@ export function CadastroForm({
           Paciente
         </button>
         <button
-          className={personType === Role.MEDICO ? styles.activeType : styles.inactiveType}
+          className={personType === PERSON_TYPE.DOCTOR ? styles.activeType : styles.inactiveType}
           onClick={() => {
-            setPersonType(Role.MEDICO);
+            setPersonType(PERSON_TYPE.DOCTOR);
             setMessage(null);
           }}
           type="button"
@@ -188,7 +192,7 @@ export function CadastroForm({
             </label>
             <label>
               E-mail
-              <input name="email" required={personType === Role.MEDICO} type="email" />
+              <input name="email" required={personType === PERSON_TYPE.DOCTOR} type="email" />
             </label>
             <label>
               Sexo
@@ -210,7 +214,7 @@ export function CadastroForm({
           </div>
         </fieldset>
 
-        {personType === Role.MEDICO && (
+        {personType === PERSON_TYPE.DOCTOR && (
           <fieldset className={styles.fieldset}>
             <legend>Dados profissionais</legend>
             <div className={styles.grid}>
@@ -308,12 +312,12 @@ export function CadastroForm({
           </button>
           <button
             className={styles.primaryButton}
-            disabled={submitting || (personType === Role.MEDICO && specialties.length === 0)}
+            disabled={submitting || (personType === PERSON_TYPE.DOCTOR && specialties.length === 0)}
             type="submit"
           >
             {submitting
               ? "Cadastrando..."
-              : `Cadastrar ${personType === Role.PACIENTE ? "paciente" : "médico"}`}
+              : `Cadastrar ${personType === PERSON_TYPE.PATIENT ? "paciente" : "médico"}`}
           </button>
         </div>
       </form>
