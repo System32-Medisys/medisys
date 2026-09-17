@@ -1,0 +1,172 @@
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 8px 28px #17433b0d;
+  padding: clamp(20px, 4vw, 32px);
+}
+
+.requiredLegend {
+  color: var(--muted);
+  margin: 0 0 18px;
+  text-align: right;
+}
+
+.required {
+  color: #b42318;
+  font-weight: 700;
+}
+
+.typeSelector {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.typeSelector button {
+  border: 1px solid var(--line);
+  padding: 13px 18px;
+}
+
+.activeType {
+  background: var(--brand);
+  color: #fff;
+}
+
+.inactiveType {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.form {
+  display: grid;
+  gap: 28px;
+}
+
+.fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.fieldset legend {
+  font-size: 1.12rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.grid label {
+  display: grid;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.grid input,
+.grid select {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink);
+  font: inherit;
+  min-width: 0;
+  padding: 13px;
+  text-transform: none;
+}
+
+.grid input[aria-invalid="true"],
+.grid select[aria-invalid="true"] {
+  border-color: #b42318;
+}
+
+.grid input[aria-invalid="true"]:focus,
+.grid select[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px #b4231824;
+}
+
+.fieldError {
+  color: #b42318;
+  font-size: 0.82rem;
+  font-weight: 400;
+}
+
+.grid input:focus,
+.grid select:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px #087f7024;
+  outline: none;
+}
+
+.wide {
+  grid-column: span 2;
+}
+
+.hint,
+.error,
+.success {
+  border-radius: 10px;
+  margin: 14px 0 0;
+  padding: 12px 14px;
+}
+
+.hint {
+  background: var(--paper);
+  color: var(--muted);
+}
+
+.error {
+  background: #feeceb;
+  color: #9d2018;
+}
+
+.success {
+  background: var(--accent);
+  color: var(--brand-dark);
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.secondaryButton {
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.primaryButton {
+  background: var(--brand);
+  color: #fff;
+}
+
+@media (max-width: 700px) {
+  .grid,
+  .typeSelector {
+    grid-template-columns: 1fr;
+  }
+
+  .wide {
+    grid-column: span 1;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .actions button {
+    width: 100%;
+  }
+}

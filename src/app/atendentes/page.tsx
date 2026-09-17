@@ -1,13 +1,18 @@
 import { Role } from "@prisma/client";
+import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { requirePageRole } from "@/lib/auth";
 import { db } from "@/lib/db";
+import styles from "./atendentes.module.css";
 
 export default async function AttendantsPage() {
   const session = await requirePageRole([Role.ADMINISTRADOR]);
   const attendants = await db.user.findMany({ where: { role: Role.ATENDENTE }, orderBy: { fullName: "asc" } });
 
   return <AppShell currentPath="/atendentes" role={session.role} title="Atendentes" subtitle="Consulte os atendentes cadastrados no sistema." userName={session.user.fullName}>
+    <div className={styles.toolbar}>
+      <Link className={styles.createButton} href="/cadastro/atendente">Cadastrar atendente</Link>
+    </div>
     <section className="card table-card">
       {attendants.length === 0 ? <p className="empty-state">Nenhum atendente cadastrado.</p> : <div className="table-scroll"><table>
         <thead><tr><th>Nome</th><th>CPF</th><th>Telefone</th><th>E-mail</th><th>Status</th></tr></thead>
