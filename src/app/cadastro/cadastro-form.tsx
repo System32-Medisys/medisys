@@ -4,13 +4,14 @@ import { type FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./cadastro.module.css";
 
-type PersonType = "PACIENTE" | "MEDICO";
+type PersonType = "PACIENTE" | "MEDICO" | "ATENDENTE";
 type SpecialtyOption = { id: string; name: string };
 type FieldErrors = Record<string, string[]>;
 
 const PERSON_TYPE = {
   PATIENT: "PACIENTE" as const,
   DOCTOR: "MEDICO" as const,
+  ATTENDANT: "ATENDENTE" as const,
 };
 
 function onlyDigits(value: string, limit: number) {
@@ -52,9 +53,11 @@ function errorProps(errors: FieldErrors, name: string) {
 }
 
 export function CadastroForm({
+  fixedType = false,
   initialType,
   specialties,
 }: {
+  fixedType?: boolean;
   initialType: PersonType;
   specialties: SpecialtyOption[];
 }) {
@@ -92,8 +95,8 @@ export function CadastroForm({
       birthDate: String(form.get("birthDate") ?? ""),
       phone,
       email: optional("email"),
-      sex: optional("sex"),
-      healthInsurance: optional("healthInsurance"),
+      sex: personType === PERSON_TYPE.ATTENDANT ? undefined : optional("sex"),
+      healthInsurance: personType === PERSON_TYPE.ATTENDANT ? undefined : optional("healthInsurance"),
       password: String(form.get("password") ?? ""),
       role: personType,
       address: {
@@ -140,9 +143,7 @@ export function CadastroForm({
 
       setMessage({
         type: "success",
-        text: personType === PERSON_TYPE.PATIENT
-          ? "Paciente cadastrado com sucesso."
-          : "Médico cadastrado com sucesso.",
+        text: `${personLabel.charAt(0).toUpperCase() + personLabel.slice(1)} cadastrado com sucesso.`,
       });
       window.setTimeout(() => {
         router.push(personType === PERSON_TYPE.PATIENT ? "/pacientes" : "/medicos");
@@ -158,28 +159,40 @@ export function CadastroForm({
     }
   }
 
-  const destination = personType === PERSON_TYPE.PATIENT ? "/pacientes" : "/medicos";
+  const destination = personType === PERSON_TYPE.PATIENT
+    ? "/pacientes"
+    : personType === PERSON_TYPE.DOCTOR
+      ? "/medicos"
+      : "/atendentes";
+
+  const personLabel = personType === PERSON_TYPE.PATIENT
+    ? "paciente"
+    : personType === PERSON_TYPE.DOCTOR
+      ? "médico"
+      : "atendente";
 
   return (
     <section className={styles.card}>
       <p className={styles.requiredLegend}><RequiredMark /> Campos obrigatórios</p>
 
-      <div className={styles.typeSelector} aria-label="Tipo de cadastro">
-        <button
-          className={personType === PERSON_TYPE.PATIENT ? styles.activeType : styles.inactiveType}
-          onClick={() => changePersonType(PERSON_TYPE.PATIENT)}
-          type="button"
-        >
-          Paciente
-        </button>
-        <button
-          className={personType === PERSON_TYPE.DOCTOR ? styles.activeType : styles.inactiveType}
-          onClick={() => changePersonType(PERSON_TYPE.DOCTOR)}
-          type="button"
-        >
-          Médico
-        </button>
-      </div>
+      {!fixedType && (
+        <div className={styles.typeSelector} aria-label="Tipo de cadastro">
+          <button
+            className={personType === PERSON_TYPE.PATIENT ? styles.activeType : styles.inactiveType}
+            onClick={() => changePersonType(PERSON_TYPE.PATIENT)}
+            type="button"
+          >
+            Paciente
+          </button>
+          <button
+            className={personType === PERSON_TYPE.DOCTOR ? styles.activeType : styles.inactiveType}
+            onClick={() => changePersonType(PERSON_TYPE.DOCTOR)}
+            type="button"
+          >
+            Médico
+          </button>
+        </div>
+      )}
 
       <form className={styles.form} noValidate onSubmit={handleSubmit}>
         <fieldset className={styles.fieldset}>
@@ -237,19 +250,23 @@ export function CadastroForm({
               />
               <FieldError errors={fieldErrors} name="email" />
             </label>
-            <label>
-              <span>Sexo</span>
-              <select defaultValue="" name="sex">
-                <option value="">Não informado</option>
-                <option value="Masculino">Masculino</option>
-                <option value="Feminino">Feminino</option>
-                <option value="Outro">Outro</option>
-              </select>
-            </label>
-            <label>
-              <span>Convênio</span>
-              <input name="healthInsurance" />
-            </label>
+            {personType !== PERSON_TYPE.ATTENDANT && (
+              <>
+                <label>
+                  <span>Sexo</span>
+                  <select defaultValue="" name="sex">
+                    <option value="">Não informado</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Feminino">Feminino</option>
+                    <option value="Outro">Outro</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Convênio</span>
+                  <input name="healthInsurance" />
+                </label>
+              </>
+            )}
             <label>
               <span>Senha inicial <RequiredMark /></span>
               <input minLength={6} name="password" required type="password" {...errorProps(fieldErrors, "password")} />
@@ -363,7 +380,7 @@ export function CadastroForm({
             disabled={submitting || (personType === PERSON_TYPE.DOCTOR && specialties.length === 0)}
             type="submit"
           >
-            {submitting ? "Cadastrando..." : `Cadastrar ${personType === PERSON_TYPE.PATIENT ? "paciente" : "médico"}`}
+            {submitting ? "Cadastrando..." : `Cadastrar ${personLabel}`}
           </button>
         </div>
       </form>
