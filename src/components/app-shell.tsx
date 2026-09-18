@@ -1,6 +1,7 @@
 import { Role } from "@prisma/client";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { NavigationIcon } from "./navigation-icon";
 
 type NavigationItem = {
   href: string;
@@ -53,7 +54,7 @@ export function AppShell({
     <div className="app-layout">
       <aside className="sidebar">
         <Link className="sidebar-brand" href="/dashboard" aria-label="Página inicial do Medisys">
-          <span className="brand brand-small">M+</span>
+          <span className="brand brand-small">m<span>+</span></span>
           <span><strong>Medisys</strong><small>SYSTEM32</small></span>
         </Link>
         <nav className="main-navigation" aria-label="Navegação principal">
@@ -61,16 +62,17 @@ export function AppShell({
             <Link
               className={currentPath === item.href ? "nav-link active" : "nav-link"}
               href={item.href}
+              aria-current={currentPath === item.href ? "page" : undefined}
               key={item.href}
             >
-              <span className="nav-icon" aria-hidden="true">{item.shortLabel}</span>
+              <span className="nav-icon" aria-hidden="true"><NavigationIcon name={item.shortLabel} /></span>
               {item.label}
             </Link>
           ))}
         </nav>
         <form action="/api/auth/logout" method="post" className="sidebar-footer">
           <button className="nav-link logout-button" type="submit">
-            <span className="nav-icon" aria-hidden="true">SA</span>
+            <span className="nav-icon" aria-hidden="true"><NavigationIcon name="SA" /></span>
             Sair
           </button>
         </form>
