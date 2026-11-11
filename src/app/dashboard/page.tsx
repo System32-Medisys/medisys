@@ -86,13 +86,24 @@ export default async function DashboardPage() {
 
   const firstName = session.user.fullName.split(" ")[0];
   const pendingTotal = pendingConsultations + pendingExams;
+  const currentHour = Number(new Intl.DateTimeFormat("pt-BR", {
+    hour: "2-digit",
+    hour12: false,
+    timeZone: "America/Sao_Paulo",
+  }).format(new Date()));
+  const greeting = currentHour < 12 ? "Bom dia" : currentHour < 18 ? "Boa tarde" : "Boa noite";
+  const todayLabel = new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "full",
+    timeZone: "America/Sao_Paulo",
+  }).format(new Date());
+  const nextItem = agenda[0];
 
   return (
     <AppShell
       currentPath="/dashboard"
       role={session.role}
-      title={`Bom dia, ${firstName}`}
-      subtitle="Aqui está o resumo da clínica para hoje."
+      title={`${greeting}, ${firstName}`}
+      subtitle={`Hoje é ${todayLabel}. Veja o resumo e as prioridades do dia.`}
       userName={session.user.fullName}
     >
       <section className="kpi-grid" aria-label="Resumo do dia">
@@ -112,11 +123,19 @@ export default async function DashboardPage() {
             <em>{isStaff ? "Ver cadastros" : "Acesso autorizado"}</em>
           </span>
         </Link>
-        <article className="kpi-card warning">
+        <Link className="kpi-card warning" href="/pendencias">
           <span className="kpi-icon pending-icon" aria-hidden="true">!</span>
-          <span><small>Pendências</small><strong>{pendingTotal}</strong><em>Requerem acompanhamento</em></span>
-        </article>
+          <span><small>Pendências</small><strong>{pendingTotal}</strong><em>Abrir painel de pendências</em></span>
+        </Link>
       </section>
+
+      {nextItem && (
+        <Link className="daily-highlight" href={nextItem.kind === "Consulta" ? "/consultas" : "/exames"}>
+          <span className="highlight-label">Próximo atendimento</span>
+          <strong>{formatDateTime(nextItem.scheduledAt)} · {nextItem.title}</strong>
+          <span>{nextItem.kind} · {nextItem.detail} →</span>
+        </Link>
+      )}
 
       <div className="dashboard-grid proposal-grid">
         <section className="card agenda-card" aria-labelledby="today-agenda-title">
