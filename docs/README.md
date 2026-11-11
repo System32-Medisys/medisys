@@ -14,5 +14,6 @@
 12. [Agendamentos e status](08-agendamentos-status.md)
 13. [Controles e auditoria](09-lgpd-auditoria.md)
 14. [Escopo do MVP](10-escopo-mvp.md)
+15. [Stack técnica, tecnologias e metodologias](11-stack-tecnica-tecnologias-metodologias.md)
 
 Os documentos antigos duplicados foram removidos para evitar contradições.
