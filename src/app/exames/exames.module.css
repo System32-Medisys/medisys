@@ -1,0 +1,26 @@
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 18px;
+}
+
+.createButton {
+  background: var(--brand);
+  border-radius: 10px;
+  color: #fff;
+  display: inline-flex;
+  font-weight: 700;
+  padding: 12px 18px;
+}
+
+.createButton:hover,
+.createButton:focus-visible {
+  background: var(--brand-dark);
+}
+
+@media (max-width: 700px) {
+  .createButton {
+    justify-content: center;
+    width: 100%;
+  }
+}
