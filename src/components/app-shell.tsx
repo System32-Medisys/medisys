@@ -145,10 +145,18 @@ export function AppShell({
 
       <div className="app-content">
         <div className="topbar">
-          <Link className="global-search" href="/consultas" aria-label="Buscar nas consultas">
+          <form className="global-search" action="/busca" method="get" role="search">
             <span className="search-icon" aria-hidden="true">⌕</span>
-            <span>Buscar consultas e pacientes...</span>
-          </Link>
+            <input
+              aria-label="Pesquisar no sistema"
+              minLength={2}
+              name="q"
+              placeholder="Buscar pessoas, consultas e exames..."
+              required
+              type="search"
+            />
+            <button type="submit">Buscar</button>
+          </form>
           <div className="user-summary">
             <span className="user-avatar" aria-hidden="true">{initials}</span>
             <span><strong>{userName}</strong><small>{roleLabels[role]}</small></span>
