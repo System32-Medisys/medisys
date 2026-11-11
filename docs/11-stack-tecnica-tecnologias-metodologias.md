@@ -36,6 +36,7 @@ Fluxo simplificado:
 | Versionamento | Git e GitHub | Controle de versões, branches, commits e pull requests. |
 | Hospedagem | Vercel | Build e publicação da aplicação Next.js. |
 | Ambiente | Node.js e npm | Execução do projeto e gerenciamento das dependências. |
+| Gestão do projeto | Praxilab | Organização e acompanhamento das atividades com Scrum e Kanban. |
 
 ## 3. Organização da arquitetura
 
@@ -102,11 +103,13 @@ O projeto utiliza a abordagem de Produto Mínimo Viável. Primeiro são implemen
 
 Funcionalidades adicionais são priorizadas depois da validação desses fluxos.
 
-### 6.2 Desenvolvimento incremental
+### 6.2 Scrum e Kanban no Praxilab
 
-O sistema é desenvolvido em pequenas entregas. Cada módulo é implementado, testado e integrado progressivamente, reduzindo o risco de alterar toda a aplicação de uma única vez.
+O grupo adotou Scrum e Kanban utilizando a plataforma Praxilab para organizar e acompanhar o desenvolvimento.
 
-Essa prática é incremental, mas o grupo não definiu formalmente o uso de Scrum, Kanban ou sprints.
+O Scrum orienta a divisão do trabalho em entregas menores e progressivas. O Kanban oferece a visualização das atividades e de seus estados, ajudando o grupo a identificar o que precisa ser feito, o que está em andamento e o que foi concluído.
+
+O desenvolvimento também permanece incremental: cada módulo é implementado, testado e integrado progressivamente, reduzindo o risco de alterar toda a aplicação de uma única vez.
 
 ### 6.3 Branches por funcionalidade
 
@@ -151,4 +154,4 @@ Antes de uma branch ser integrada, são executados:
 
 A stack foi escolhida para manter o projeto centralizado, tipado e adequado a uma aplicação acadêmica com dados relacionais. O Next.js reúne interface e backend; o Prisma organiza o acesso ao banco; o PostgreSQL do Supabase mantém os dados; o GitHub controla as versões; e a Vercel publica a aplicação.
 
-A metodologia adotada combina MVP, desenvolvimento incremental, branches por funcionalidade, commits pequenos, documentação contínua e validação técnica antes de cada integração.
+A metodologia adotada combina MVP, Scrum e Kanban gerenciados no Praxilab, desenvolvimento incremental, branches por funcionalidade, commits pequenos, documentação contínua e validação técnica antes de cada integração.
