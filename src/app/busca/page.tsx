@@ -21,9 +21,8 @@ export default async function SearchPage({
       : {};
   const examAccess = session.role === Role.PACIENTE ? { patientId: session.userId } : {};
 
-  const [people, consultations, exams] = query.length >= 2
-    ? await Promise.all([
-        canViewPeople
+  const [people, consultations, exams] = await Promise.all([
+        query.length >= 2 && canViewPeople
           ? db.user.findMany({
               where: {
                 role: { in: [Role.PACIENTE, Role.MEDICO] },
@@ -38,7 +37,7 @@ export default async function SearchPage({
               take: 8,
             })
           : Promise.resolve([]),
-        db.consultation.findMany({
+        query.length >= 2 ? db.consultation.findMany({
           where: {
             AND: [
               consultationAccess,
@@ -55,8 +54,8 @@ export default async function SearchPage({
           include: { patient: { select: { fullName: true } }, doctor: { select: { fullName: true } } },
           orderBy: { scheduledAt: "desc" },
           take: 8,
-        }),
-        db.examAppointment.findMany({
+        }) : Promise.resolve([]),
+        query.length >= 2 ? db.examAppointment.findMany({
           where: {
             AND: [
               examAccess,
@@ -72,9 +71,8 @@ export default async function SearchPage({
           include: { patient: { select: { fullName: true } }, examType: { select: { name: true } } },
           orderBy: { scheduledAt: "desc" },
           take: 8,
-        }),
-      ])
-    : [[], [], []];
+        }) : Promise.resolve([]),
+      ]);
 
   const total = people.length + consultations.length + exams.length;
 
