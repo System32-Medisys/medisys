@@ -135,10 +135,6 @@ export function AppShell({
           })}
         </nav>
 
-        <div className="sidebar-account">
-          <span className="user-avatar" aria-hidden="true">{initials}</span>
-          <span className="sidebar-user"><strong>{userName}</strong><small>{roleLabels[role]}</small></span>
-        </div>
         <form action="/api/auth/logout" method="post" className="sidebar-footer">
           <button className="nav-link logout-button" type="submit">
             <NavIcon name="logout" />
@@ -148,15 +144,29 @@ export function AppShell({
       </aside>
 
       <div className="app-content">
+        <div className="topbar">
+          <form className="global-search" action="/busca" method="get" role="search">
+            <span className="search-icon" aria-hidden="true">⌕</span>
+            <input
+              aria-label="Pesquisar no sistema"
+              minLength={2}
+              name="q"
+              placeholder="Buscar pessoas, consultas e exames..."
+              required
+              type="search"
+            />
+            <button type="submit">Buscar</button>
+          </form>
+          <div className="user-summary">
+            <span className="user-avatar" aria-hidden="true">{initials}</span>
+            <span><strong>{userName}</strong><small>{roleLabels[role]}</small></span>
+          </div>
+        </div>
         <header className="page-header">
           <div>
             <p className="eyebrow">MEDISYS</p>
             <h1>{title}</h1>
             {subtitle && <p className="muted page-subtitle">{subtitle}</p>}
-          </div>
-          <div className="user-summary">
-            <span className="user-avatar" aria-hidden="true">{initials}</span>
-            <span><strong>{userName}</strong><small>{roleLabels[role]}</small></span>
           </div>
         </header>
         <main className="page-main">{children}</main>
