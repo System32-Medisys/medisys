@@ -1,8 +1,10 @@
 import { Role } from "@prisma/client";
+import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { requirePageSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDateTime, formatStatus } from "@/lib/format";
+import styles from "./exames.module.css";
 
 export default async function ExamsPage() {
   const session = await requirePageSession();
@@ -19,6 +21,9 @@ export default async function ExamsPage() {
   const title = session.role === Role.PACIENTE ? "Meus exames" : "Exames e resultados";
 
   return <AppShell currentPath="/exames" role={session.role} title={title} subtitle="Acompanhe os exames e a disponibilidade dos resultados." userName={session.user.fullName}>
+    {(session.role === Role.ATENDENTE || session.role === Role.ADMINISTRADOR) && <div className={styles.toolbar}>
+      <Link className={styles.createButton} href="/exames/novo">Agendar exame</Link>
+    </div>}
     <section className="card table-card">
       {exams.length === 0 ? <p className="empty-state">Nenhum exame encontrado.</p> : <div className="table-scroll"><table>
         <thead><tr><th>Data e hora</th>{session.role !== Role.PACIENTE && <th>Paciente</th>}<th>Tipo</th><th>Status</th><th>Resultado</th></tr></thead>
