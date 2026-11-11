@@ -79,6 +79,15 @@ export const userSchema = z.object({
 });
 
 export const scheduleSchema = z.object({
-  patientId: z.string().min(1),
-  scheduledAt: z.coerce.date().refine((date) => date > new Date(), "Não é permitido agendar no passado."),
+  patientId: z.string().min(1, "Selecione um paciente."),
+  scheduledAt: z.coerce.date({ error: "Informe uma data e hora válidas." })
+    .refine((date) => date > new Date(), "Não é permitido agendar no passado."),
+});
+
+export const consultationScheduleSchema = scheduleSchema.extend({
+  doctorId: z.string().min(1, "Selecione um médico."),
+});
+
+export const examScheduleSchema = scheduleSchema.extend({
+  examTypeId: z.string().min(1, "Selecione um tipo de exame."),
 });
