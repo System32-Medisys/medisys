@@ -20,9 +20,18 @@
 - Alinhamento com PostgreSQL do Supabase;
 - Criação dos critérios de conclusão do MVP.
 
+## 11/11/2026 — Agendamento de consultas e exames
+- Formulários protegidos para atendentes e administradores;
+- Seleção apenas de pacientes, médicos e tipos de exames ativos;
+- Integração com as APIs de consultas e exames;
+- Validação de datas passadas e conflitos de horário;
+- Mensagens de sucesso e erro na interface;
+- Testes das validações de agendamento.
+
 ## Próximos passos
-- Criar e validar a migração do banco;
-- Implementar formulários e fluxos restantes;
+- Implementar atualização e desativação de cadastros;
+- Implementar reagendamento, cancelamento e registro de faltas;
+- Implementar resultados de exames e arquivos opcionais;
 - Criar protótipos e diagramas;
 - Ampliar os testes;
 - Validar o MVP completo.
