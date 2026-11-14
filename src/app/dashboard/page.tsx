@@ -9,6 +9,7 @@ import { AppShell } from "@/components/app-shell";
 import { requirePageSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDateTime, formatStatus } from "@/lib/format";
+import { CLINIC_TIME_ZONE, getClinicDayRange, getClinicHour, getNextUpcomingAppointment } from "@/lib/dashboard";
 
 export default async function DashboardPage() {
   const session = await requirePageSession();
@@ -20,14 +21,11 @@ export default async function DashboardPage() {
   const whereExam = session.role === Role.PACIENTE ? { patientId: session.userId } : {};
   const isStaff = session.role === Role.ATENDENTE || session.role === Role.ADMINISTRADOR;
 
-  const todayStart = new Date();
-  todayStart.setUTCHours(3, 0, 0, 0);
-  if (todayStart > new Date()) todayStart.setUTCDate(todayStart.getUTCDate() - 1);
-  const tomorrowStart = new Date(todayStart);
-  tomorrowStart.setUTCDate(tomorrowStart.getUTCDate() + 1);
-  const todayRange = { gte: todayStart, lt: tomorrowStart };
+  const now = new Date();
+  const { start, end } = getClinicDayRange(now);
+  const todayRange = { gte: start, lt: end };
 
-  const [todayConsultations, todayExams, activePatients, pendingConsultations, pendingExams] =
+  const [todayConsultations, todayExams, activePatients, pendingConsultations, pendingExams, nextConsultations, nextExams] =
     await Promise.all([
       db.consultation.findMany({
         where: { ...whereConsultation, scheduledAt: todayRange },
@@ -52,14 +50,23 @@ export default async function DashboardPage() {
         where: {
           ...whereConsultation,
           status: { in: [ConsultationStatus.AGENDADA, ConsultationStatus.CONFIRMADA] },
-          scheduledAt: { gte: new Date() },
+          scheduledAt: { gte: now },
         },
       }),
       db.examAppointment.count({
-        where: {
-          ...whereExam,
-          status: { in: [ExamStatus.AGENDADO, ExamStatus.RESULTADO_PENDENTE] },
-        },
+        where: { ...whereExam, status: { in: [ExamStatus.AGENDADO, ExamStatus.RESULTADO_PENDENTE] } },
+      }),
+      db.consultation.findMany({
+        where: { ...whereConsultation, scheduledAt: { gte: now }, status: { in: [ConsultationStatus.AGENDADA, ConsultationStatus.CONFIRMADA] } },
+        include: { patient: { select: { fullName: true } }, doctor: { select: { fullName: true } } },
+        orderBy: { scheduledAt: "asc" },
+        take: 1,
+      }),
+      db.examAppointment.findMany({
+        where: { ...whereExam, scheduledAt: { gte: now }, status: ExamStatus.AGENDADO },
+        include: { patient: { select: { fullName: true } }, examType: { select: { name: true } } },
+        orderBy: { scheduledAt: "asc" },
+        take: 1,
       }),
     ]);
 
@@ -86,17 +93,24 @@ export default async function DashboardPage() {
 
   const firstName = session.user.fullName.split(" ")[0];
   const pendingTotal = pendingConsultations + pendingExams;
-  const currentHour = Number(new Intl.DateTimeFormat("pt-BR", {
-    hour: "2-digit",
-    hour12: false,
-    timeZone: "America/Sao_Paulo",
-  }).format(new Date()));
+  const currentHour = getClinicHour(now);
   const greeting = currentHour < 12 ? "Bom dia" : currentHour < 18 ? "Boa tarde" : "Boa noite";
   const todayLabel = new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "full",
-    timeZone: "America/Sao_Paulo",
+    timeZone: CLINIC_TIME_ZONE,
   }).format(new Date());
-  const nextItem = agenda[0];
+  const nextItem = getNextUpcomingAppointment([
+    ...nextConsultations.map((item) => ({
+      id: item.id, kind: "Consulta" as const, scheduledAt: item.scheduledAt,
+      title: session.role === Role.PACIENTE ? item.doctor.fullName : item.patient.fullName,
+      detail: session.role === Role.PACIENTE ? "Consulta médica" : "Dr(a). " + item.doctor.fullName,
+    })),
+    ...nextExams.map((item) => ({
+      id: item.id, kind: "Exame" as const, scheduledAt: item.scheduledAt,
+      title: session.role === Role.PACIENTE ? item.examType.name : item.patient.fullName,
+      detail: item.examType.name,
+    })),
+  ], now);
 
   return (
     <AppShell
@@ -115,17 +129,17 @@ export default async function DashboardPage() {
           <span className="kpi-icon exam-icon" aria-hidden="true">✚</span>
           <span><small>Exames hoje</small><strong>{todayExams.length}</strong><em>Ver exames</em></span>
         </Link>
-        <Link className="kpi-card" href={isStaff ? "/pacientes" : "/configuracoes"}>
+        <Link className="kpi-card" href={isStaff ? "/pacientes" : "/consultas"}>
           <span className="kpi-icon patient-icon" aria-hidden="true">●</span>
           <span>
-            <small>{isStaff ? "Pacientes ativos" : "Situação da conta"}</small>
+            <small>{isStaff ? "Pacientes ativos" : "Meu acesso"}</small>
             <strong>{isStaff ? activePatients : "Ativa"}</strong>
-            <em>{isStaff ? "Ver cadastros" : "Acesso autorizado"}</em>
+            <em>{isStaff ? "Ver cadastros" : "Ver minhas consultas"}</em>
           </span>
         </Link>
         <Link className="kpi-card warning" href="/pendencias">
           <span className="kpi-icon pending-icon" aria-hidden="true">!</span>
-          <span><small>Pendências</small><strong>{pendingTotal}</strong><em>Abrir painel de pendências</em></span>
+          <span><small>{isStaff ? "Pendências da clínica" : "Meus acompanhamentos"}</small><strong>{pendingTotal}</strong><em>Ver itens em acompanhamento</em></span>
         </Link>
       </section>
 
