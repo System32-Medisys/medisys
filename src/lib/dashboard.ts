@@ -109,3 +109,30 @@ export function getDashboardDailySeries(
   for (const item of exams) e.set(keyOf(item.scheduledAt), (e.get(keyOf(item.scheduledAt)) ?? 0) + 1);
   return days.map(({ day, label }) => ({ label, consultations: c.get(day) ?? 0, exams: e.get(day) ?? 0 }));
 }
+
+
+export function getPreviousDashboardPeriodRange(now: Date, period: DashboardPeriod) {
+  const current = getDashboardPeriodRange(now, period);
+  const previousInstant = new Date(current.start.getTime() - 1);
+  return getDashboardPeriodRange(previousInstant, period);
+}
+
+export function calculatePeriodChange(current: number, previous: number) {
+  if (previous === 0) return current === 0 ? "Sem variação" : "Sem base anterior";
+  const change = Math.round(((current - previous) / previous) * 100);
+  return `${change > 0 ? "+" : ""}${change}% em relação ao período anterior`;
+}
+
+export function isOverdueConsultation(
+  item: { scheduledAt: Date; status: string },
+  now: Date,
+) {
+  return item.scheduledAt.getTime() < now.getTime()
+    && (item.status === "AGENDADA" || item.status === "CONFIRMADA");
+}
+
+export function escapeCsvCell(value: string | number) {
+  const str = String(value);
+  const safe = /^[=+@\-\t\r]/.test(str) ? "'" + str : str;
+  return '"' + safe.replaceAll('"', '""') + '"';
+}
