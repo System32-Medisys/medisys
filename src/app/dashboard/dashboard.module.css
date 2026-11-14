@@ -52,3 +52,8 @@
 .productivity > div { display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); padding: 10px 0; font-size: .83rem; }
 .productivity strong { color: var(--brand-dark); }
 @media (max-width: 650px) { .reportingNote { align-items: flex-start; flex-direction: column; } .filterForm { align-items: stretch; } .filterForm label { flex-basis: 100%; } }
+
+.absences { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+.absences p { margin: 0; display: flex; align-items: center; gap: 10px; min-height: 58px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 11px; background: #fff; font-size: .72rem; color: var(--muted); }
+.absences strong { color: var(--ink); font-size: 1.2rem; }
+@media (max-width: 900px) { .absences { grid-template-columns: 1fr; } }
