@@ -362,7 +362,7 @@ export default async function DashboardPage({
         </section>
         <section className="card" aria-label="Gráfico de atendimentos">
           <h2>Movimentação de atendimentos — {periodLabel}</h2>
-          <p className="muted">Quantidade de consultas e exames agendados por dia, independentemente do status.</p>
+          <p className="muted">Quantidade de consultas e exames por dia, respeitando o período e os filtros selecionados.</p>
           <div className={styles.legend}><span>■ Consultas</span><span>■ Exames</span></div>
           <div className={styles.chartScroll}>
             <div className={styles.chart} role="img" aria-label={`Gráfico de ${periodLabel}: ${periodConsultations.length} consultas e ${periodExams.length} exames`}>
