@@ -225,7 +225,7 @@ export default async function DashboardPage({
           ].map((option) => (
             <Link
               key={option.value}
-              href={`/dashboard?periodo=${option.value}`}
+              href={"/dashboard?" + new URLSearchParams({ ...Object.fromEntries(filterParams.entries()), periodo: option.value }).toString()}
               className={period === option.value ? styles.selectedPeriod : styles.period}
               aria-current={period === option.value ? "page" : undefined}
             >
@@ -234,11 +234,46 @@ export default async function DashboardPage({
           ))}
         </nav>
         <form action="/dashboard" method="get">
-          <input type="hidden" name="periodo" value={period} />
+          {Array.from(filterParams.entries()).map(([key, value]) => <input key={key} type="hidden" name={key} value={value} />)}
           <button className="text-link" type="submit">Atualizar indicadores</button>
         </form>
       </div>
 
+      {isStaff && (
+        <form action="/dashboard" method="get" className={styles.filterForm} aria-label="Filtros avançados">
+          <input type="hidden" name="periodo" value={period} />
+          <label>Médico
+            <select name="medico" defaultValue={doctorId ?? ""}>
+              <option value="">Todos os médicos</option>
+              {doctorOptions.map((item) => <option key={item.id} value={item.id}>{item.fullName}</option>)}
+            </select>
+          </label>
+          <label>Tipo de exame
+            <select name="tipoExame" defaultValue={examTypeId ?? ""}>
+              <option value="">Todos os tipos</option>
+              {examTypeOptions.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+            </select>
+          </label>
+          <label>Status da consulta
+            <select name="statusConsulta" defaultValue={consultationStatus ?? ""}>
+              <option value="">Todos</option>
+              {Object.values(ConsultationStatus).map((item) => <option key={item} value={item}>{formatStatus(item)}</option>)}
+            </select>
+          </label>
+          <label>Status do exame
+            <select name="statusExame" defaultValue={examStatus ?? ""}>
+              <option value="">Todos</option>
+              {Object.values(ExamStatus).map((item) => <option key={item} value={item}>{formatStatus(item)}</option>)}
+            </select>
+          </label>
+          <button className="button-link" type="submit">Aplicar filtros</button>
+          <Link className="text-link" href={"/dashboard?periodo=" + period}>Limpar</Link>
+        </form>
+      )}
+      <div className={styles.reportingNote}>
+        <span>Os filtros e as comparações se aplicam aos indicadores do período. A agenda e os alertas mostram a operação atual.</span>
+        <Link className="text-link" href={exportHref}>Exportar CSV</Link>
+      </div>
       <section className="kpi-grid" aria-label={`Resumo ${periodLabel}`}>
         <Link className="kpi-card" href="/consultas">
           <span className="kpi-icon calendar-icon" aria-hidden="true">▣</span>
@@ -262,6 +297,10 @@ export default async function DashboardPage({
         </Link>
       </section>
 
+      <section className={styles.comparison} aria-label="Comparação com período anterior">
+        <p>Consultas: <strong>{calculatePeriodChange(periodConsultations.length, previousConsultations)}</strong></p>
+        <p>Exames: <strong>{calculatePeriodChange(periodExams.length, previousExams)}</strong></p>
+      </section>
       <section className={styles.alerts} aria-label="Alertas operacionais">
         <Link href="/consultas" className={styles.alert}>
           <strong>{upcomingSoon}</strong>
@@ -270,6 +309,10 @@ export default async function DashboardPage({
         <Link href="/pendencias" className={styles.alert}>
           <strong>{awaitingResults}</strong>
           <span>Exames aguardando resultado</span>
+        </Link>
+        <Link href="/pendencias" className={styles.alert}>
+          <strong>{overdueConsultations}</strong>
+          <span>Consultas com horário ultrapassado e status ainda aberto (não equivale a falta)</span>
         </Link>
       </section>
 
@@ -326,6 +369,22 @@ export default async function DashboardPage({
         </section>
       </div>
 
+      {isStaff && (
+        <section className="card" aria-label="Produtividade por médico">
+          <h2>Consultas realizadas por médico — {periodLabel}</h2>
+          <p className="muted">Consultas com status realizada e data agendada no período. Não é uma avaliação de qualidade do atendimento.</p>
+          {productivity.length === 0 ? <p className="empty-state">Nenhuma consulta realizada neste período.</p> : (
+            <div className={styles.productivity}>
+              {productivity.map((item) => (
+                <div key={item.doctorId}>
+                  <span>{doctorOptions.find((doctor) => doctor.id === item.doctorId)?.fullName ?? "Médico inativo"}</span>
+                  <strong>{item._count._all}</strong>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
       <div className="dashboard-grid proposal-grid">
         <section className="card agenda-card" aria-labelledby="today-agenda-title">
           <div className="section-heading">
