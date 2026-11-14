@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getClinicDayRange, getClinicHour, getNextUpcomingAppointment, getDashboardPeriodRange, getDashboardDailySeries, parseDashboardPeriod } from "./dashboard";
+import { getClinicDayRange, getClinicHour, getNextUpcomingAppointment, getDashboardPeriodRange, getDashboardDailySeries, parseDashboardPeriod, getPreviousDashboardPeriodRange, calculatePeriodChange, isOverdueConsultation, escapeCsvCell } from "./dashboard";
 
 describe("dashboard: horário da clínica", () => {
   it("identifica o dia em Porto Velho na virada UTC", () => {
@@ -68,5 +68,37 @@ describe("dashboard: filtros por período", () => {
     expect(series[0].exams).toBe(0);
     expect(series[1].exams).toBe(1);
     expect(series[2].consultations).toBe(0);
+  });
+});
+
+
+describe("dashboard: comparação e alertas", () => {
+  it("calcula o período anterior sem incluir o período atual", () => {
+    const previous = getPreviousDashboardPeriodRange(new Date("2026-11-13T20:00:00.000Z"), "semana");
+    expect(previous.start.toISOString()).toBe("2026-11-02T04:00:00.000Z");
+    expect(previous.end.toISOString()).toBe("2026-11-09T04:00:00.000Z");
+  });
+
+  it("compara aumentos, reduções e ausência de base", () => {
+    expect(calculatePeriodChange(12, 10)).toBe("+20% em relação ao período anterior");
+    expect(calculatePeriodChange(8, 10)).toBe("-20% em relação ao período anterior");
+    expect(calculatePeriodChange(3, 0)).toBe("Sem base anterior");
+    expect(calculatePeriodChange(0, 0)).toBe("Sem variação");
+  });
+
+  it("não confunde atraso potencial com falta ou cancelamento", () => {
+    const now = new Date("2026-11-13T18:00:00.000Z");
+    const past = new Date("2026-11-13T16:00:00.000Z");
+    expect(isOverdueConsultation({ status: "AGENDADA", scheduledAt: past }, now)).toBe(true);
+    expect(isOverdueConsultation({ status: "CONFIRMADA", scheduledAt: past }, now)).toBe(true);
+    expect(isOverdueConsultation({ status: "FALTA_PACIENTE", scheduledAt: past }, now)).toBe(false);
+    expect(isOverdueConsultation({ status: "REALIZADA", scheduledAt: past }, now)).toBe(false);
+    expect(isOverdueConsultation({ status: "AGENDADA", scheduledAt: now }, now)).toBe(false);
+  });
+
+  it("protege células de planilha contra injeção de fórmulas", () => {
+    expect(escapeCsvCell("=1+1")).toBe('"\'=1+1"');
+    expect(escapeCsvCell("consulta")).toBe('"consulta"');
+    expect(escapeCsvCell('a"b')).toBe('"a""b"');
   });
 });
