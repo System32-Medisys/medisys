@@ -24,7 +24,8 @@ export default async function PendingPage() {
     status: { in: [ExamStatus.AGENDADO, ExamStatus.RESULTADO_PENDENTE] },
   };
 
-  const [consultations, exams, consultationTotal, examTotal] = await Promise.all([
+  const now = new Date();
+  const [consultations, exams, consultationTotal, examTotal, overdueConsultations, awaitingResults, scheduledExams] = await Promise.all([
     db.consultation.findMany({
       where: consultationWhere,
       include: { patient: { select: { fullName: true } }, doctor: { select: { fullName: true } } },
@@ -39,6 +40,15 @@ export default async function PendingPage() {
     }),
     db.consultation.count({ where: consultationWhere }),
     db.examAppointment.count({ where: examWhere }),
+    db.consultation.count({
+      where: {
+        ...consultationAccess,
+        status: { in: [ConsultationStatus.AGENDADA, ConsultationStatus.CONFIRMADA] },
+        scheduledAt: { lt: now },
+      },
+    }),
+    db.examAppointment.count({ where: { ...examAccess, status: ExamStatus.RESULTADO_PENDENTE } }),
+    db.examAppointment.count({ where: { ...examAccess, status: ExamStatus.AGENDADO } }),
   ]);
 
   return (
@@ -55,6 +65,15 @@ export default async function PendingPage() {
         <article className="mini-summary total"><small>Total</small><strong>{consultationTotal + examTotal}</strong><span>Itens para acompanhar</span></article>
       </section>
 
+      <section aria-label="Pendências detalhadas">
+        <h2>Detalhamento de situações que precisam de atenção</h2>
+        <p className="muted">Horário ultrapassado significa status ainda aberto, não uma falta registrada. Os itens abaixo são categorias operacionais, não devem ser somados ao total acima.</p>
+        <div className="pending-summary">
+          <article className="mini-summary"><small>Consultas com horário ultrapassado</small><strong>{overdueConsultations}</strong><span>Agendadas ou confirmadas, ainda sem encerramento</span></article>
+          <article className="mini-summary"><small>Resultados pendentes</small><strong>{awaitingResults}</strong><span>Exames aguardando resultado</span></article>
+          <article className="mini-summary"><small>Exames agendados</small><strong>{scheduledExams}</strong><span>Exames aguardando realização</span></article>
+        </div>
+      </section>
       <div className="pending-columns">
         <section className="card table-card">
           <div className="section-heading pending-heading">
