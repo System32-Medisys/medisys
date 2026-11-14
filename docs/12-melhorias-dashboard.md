@@ -38,3 +38,22 @@ Não foi feita migração nem alteração de dados reais. As alterações remota
 - Necessário executar `npm install`, `npx prisma generate`, `npm test`, `npx tsc --noEmit`, `npm run build` em um ambiente com dependências e configuração disponíveis.
 - Verificar manualmente perfis, dados com e sem registros, navegação no celular, preview na Vercel e consistência com a página de pendências.
 - Não foi executada validação de integração com banco real nesta etapa. Não fazer merge antes dessas verificações.
+
+
+## Etapa seguinte — filtros, alertas, produtividade, comparação e exportação
+
+- **Filtros administrativos:** o dashboard da equipe (ATENDENTE e ADMINISTRADOR) aceita filtros por médico, tipo de exame e status separados de consultas e exames, além de Hoje/Semana/Mês. Os IDs recebidos por URL são validados contra médicos ativos e tipos ativos. PACIENTE e MEDICO não recebem seletores de visão administrativa; os filtros sempre se somam ao controle de acesso original do servidor.
+- **Comparação de períodos:** consultas e exames agendados no período são comparados ao período civil anterior correspondente; quando o período anterior vale zero, a interface mostra "Sem base anterior" em vez de divisão por zero.
+- **Alertas de atraso potencial:** consultas com horário anterior ao atual e status ainda AGENDADA/CONFIRMADA precisam de revisão. Isso **não significa falta**; faltas registradas são exibidas separadamente por paciente/médico.
+- **Produtividade operacional:** para a equipe, contagem de consultas com status REALIZADA, por médico e data agendada, dentro do período selecionado. Não representa qualidade, duração ou faturamento.
+- **Pendências detalhadas:** a página de pendências diferencia exames agendados, resultados pendentes e consultas com horário ultrapassado. As categorias detalhadas não devem ser somadas aos totais gerais, pois se sobrepõem ou usam regras diferentes.
+- **Relatório CSV:** rota GET \`/dashboard/exportar\`, com autenticação, validação de filtros e apenas totais agregados por status; não inclui nomes, CPF ou dados clínicos. A exportação usa codificação UTF-8, separador ponto e vírgula e cabeçalhos de download privado. Não expõe novos dados além da visão permitida ao perfil.
+- **Atualização automática:** componente cliente atualiza os dados do servidor a cada 60 segundos, somente enquanto a aba estiver visível. Não se trata de conexão em tempo real.
+- **Sem migração de banco:** os recursos usam os modelos Prisma já existentes.
+
+## Conferências obrigatórias desta etapa
+- Executar \`npm install\`, \`npx prisma generate\`, \`npm test\`, \`npx tsc --noEmit\` e \`npm run build\` localmente, com acesso às dependências.
+- Testar filtros com IDs inválidos, perfis PACIENTE e MEDICO tentando alterar parâmetros administrativos, exportação CSV sem sessão, status cancelado, período sem dados, datas próximas à meia-noite, e responsividade.
+- Revisar com a equipe a regra atual de acesso dos médicos à lista de exames (o modelo de exame não possui um campo direto \`doctorId\`).
+- Testar em staging/preview usando dados fictícios; não executar migração nem merge antes de aprovação.
+- **Situação:** alterações no GitHub precisam passar por testes de build, integração com banco e revisão de segurança para serem consideradas concluídas.
