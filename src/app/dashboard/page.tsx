@@ -135,9 +135,9 @@ export default async function DashboardPage() {
         <Link className="kpi-card" href={isStaff ? "/pacientes" : "/consultas"}>
           <span className="kpi-icon patient-icon" aria-hidden="true">●</span>
           <span>
-            <small>{isStaff ? "Pacientes ativos" : "Meu acesso"}</small>
-            <strong>{isStaff ? activePatients : "Ativa"}</strong>
-            <em>{isStaff ? "Ver cadastros" : "Ver minhas consultas"}</em>
+            <small>{isStaff ? "Pacientes ativos" : "Próximas consultas"}</small>
+            <strong>{isStaff ? activePatients : pendingConsultations}</strong>
+            <em>{isStaff ? "Ver cadastros" : "Ver agenda"}</em>
           </span>
         </Link>
         <Link className="kpi-card warning" href="/pendencias">
