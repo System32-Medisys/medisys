@@ -1,0 +1,46 @@
+name: Verificação do Medisys
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [melhoria-dashboard-medisys]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualidade:
+    name: Testes, TypeScript e build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: postgresql://medisys:medisys@localhost:5432/medisys_test?schema=public
+      DIRECT_URL: postgresql://medisys:medisys@localhost:5432/medisys_test?schema=public
+      SESSION_SECRET: ci-only-not-for-production-medisys-2026
+
+    steps:
+      - name: Obter código
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Gerar cliente Prisma
+        run: npx prisma generate
+
+      - name: Executar testes unitários
+        run: npm test
+
+      - name: Verificar tipos TypeScript
+        run: npx tsc --noEmit
+
+      - name: Compilar aplicação
+        run: npm run build

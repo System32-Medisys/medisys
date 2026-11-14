@@ -1,0 +1,73 @@
+# Melhorias funcionais do dashboard
+
+## Objetivo
+Manter o dashboard atual, corrigindo informações de data, próximo atendimento e pendências, sem alterar a stack, permissões ou o schema do banco.
+
+## Mudanças
+- Os indicadores diários utilizam o dia civil da clínica em `America/Porto_Velho` (UTC-04), inclusive próximo à meia-noite UTC.
+- O destaque de próximo atendimento consulta o primeiro compromisso futuro de cada tipo (consulta ou exame) e escolhe o mais próximo; não destaca registros passados nem cancelados.
+- O dashboard oferece um comando explícito para recarregar seus indicadores e mostra estado vazio quando não há próximos compromissos.
+- As pendências apresentam totais reais, embora a lista mostre no máximo 20 itens de cada tipo; critérios: consultas agendadas/confirmadas com data futura e exames agendados/com resultado pendente.
+- As informações continuam restritas pelas consultas de banco de acordo com o perfil autenticado; os atalhos mantêm os destinos autorizados.
+- Os rótulos de indicadores foram refinados para diferenciar visão da equipe de acompanhamento pessoal.
+
+## Arquivos
+- `src/app/dashboard/page.tsx`
+- `src/app/pendencias/page.tsx`
+- `src/lib/dashboard.ts`
+- `src/lib/dashboard.test.ts`
+
+## Verificações necessárias antes de concluir
+Executar `npm install`, `npx prisma generate`, `npm test`, `npx tsc --noEmit` e `npm run build`. Conferir manualmente dashboards de Paciente, Médico, Atendente e Administrador, telas com/sem atendimentos, data na virada do dia e indicadores coerentes com os registros. Validar layout desktop e celular e o preview na Vercel.
+
+## Limitações
+Não foi feita migração nem alteração de dados reais. As alterações remotas não foram executadas localmente nesta etapa; a conclusão depende dos testes de integração e de build. A atualização dos indicadores é manual, não em tempo real.
+
+
+## Evolução adicional — filtros, status, alertas e gráficos
+
+- **Período:** a página `/dashboard?periodo=hoje|semana|mes` mostra indicadores e gráficos para o dia, semana civil (segunda a domingo) ou mês civil, sempre em `America/Porto_Velho`. Valor inválido assume "hoje".
+- **Indicadores de status:** consultas e exames são agrupados pelo status atual, dentro do período da **data agendada**. Não representam necessariamente atendimentos realizados naquele dia: por exemplo, uma consulta reagendada mantém sua data original como referência.
+- **Alertas:** consultas agendadas ou confirmadas nas próximas 24 horas e exames com resultado pendente. Alertas são contagens, não notificações em tempo real.
+- **Gráficos:** barras diárias de quantidade de consultas e exames agendados no período, sem revelar nomes ou documentos; dias vazios são exibidos com valor zero.
+- **Acesso:** todas as consultas de banco utilizam os filtros de perfil já existentes. Pacientes consultam somente registros próprios; médicos somente a própria agenda de consultas, mantendo o acesso a exames conforme a regra vigente; equipe administrativa possui visão global.
+- **Escopo:** não foram adicionadas tabelas, migrações ou bibliotecas.
+
+## Validação da evolução
+- Testes unitários ampliados em `src/lib/dashboard.test.ts` para dia, semana, mês, virada de dia e série diária.
+- Necessário executar `npm install`, `npx prisma generate`, `npm test`, `npx tsc --noEmit`, `npm run build` em um ambiente com dependências e configuração disponíveis.
+- Verificar manualmente perfis, dados com e sem registros, navegação no celular, preview na Vercel e consistência com a página de pendências.
+- Não foi executada validação de integração com banco real nesta etapa. Não fazer merge antes dessas verificações.
+
+
+## Etapa seguinte — filtros, alertas, produtividade, comparação e exportação
+
+- **Filtros administrativos:** o dashboard da equipe (ATENDENTE e ADMINISTRADOR) aceita filtros por médico, tipo de exame e status separados de consultas e exames, além de Hoje/Semana/Mês. Os IDs recebidos por URL são validados contra médicos ativos e tipos ativos. PACIENTE e MEDICO não recebem seletores de visão administrativa; os filtros sempre se somam ao controle de acesso original do servidor.
+- **Comparação de períodos:** consultas e exames agendados no período são comparados ao período civil anterior correspondente; quando o período anterior vale zero, a interface mostra "Sem base anterior" em vez de divisão por zero.
+- **Alertas de atraso potencial:** consultas com horário anterior ao atual e status ainda AGENDADA/CONFIRMADA precisam de revisão. Isso **não significa falta**; faltas registradas são exibidas separadamente por paciente/médico.
+- **Produtividade operacional:** para a equipe, contagem de consultas com status REALIZADA, por médico e data agendada, dentro do período selecionado. Não representa qualidade, duração ou faturamento.
+- **Pendências detalhadas:** a página de pendências diferencia exames agendados, resultados pendentes e consultas com horário ultrapassado. As categorias detalhadas não devem ser somadas aos totais gerais, pois se sobrepõem ou usam regras diferentes.
+- **Relatório CSV:** rota GET \`/dashboard/exportar\`, com autenticação, validação de filtros e apenas totais agregados por status; não inclui nomes, CPF ou dados clínicos. A exportação usa codificação UTF-8, separador ponto e vírgula e cabeçalhos de download privado. Não expõe novos dados além da visão permitida ao perfil.
+- **Atualização automática:** componente cliente atualiza os dados do servidor a cada 5 minutos (300 segundos), somente enquanto a aba estiver visível. O botão manual permanece disponível. Não se trata de conexão em tempo real.
+- **Sem migração de banco:** os recursos usam os modelos Prisma já existentes.
+
+## Conferências obrigatórias desta etapa
+- Executar \`npm install\`, \`npx prisma generate\`, \`npm test\`, \`npx tsc --noEmit\` e \`npm run build\` localmente, com acesso às dependências.
+- Testar filtros com IDs inválidos, perfis PACIENTE e MEDICO tentando alterar parâmetros administrativos, exportação CSV sem sessão, status cancelado, período sem dados, datas próximas à meia-noite, e responsividade.
+- Confirmar e testar a regra de `docs/02-usuarios-permissoes.md`: médicos acessam a própria agenda e podem consultar exames de todos os pacientes; o dashboard mantém essa regra.
+- Testar em staging/preview usando dados fictícios; não executar migração nem merge antes de aprovação.
+- **Situação:** alterações no GitHub precisam passar por testes de build, integração com banco e revisão de segurança para serem consideradas concluídas.
+
+
+## Revisão pré-merge (PR #10)
+
+- [x] Reduzir frequência de atualização de 1 para **5 minutos**; atualização manual preservada.
+- [x] Otimizar a consulta da agenda de hoje com `take: 6` em cada tipo, ordenando e exibindo no máximo seis linhas no total.
+- [x] Consolidar os totais de exames pendentes e resultados pendentes em uma consulta `groupBy(status)`, em vez de duas contagens independentes.
+- [ ] Executar `npm install`, `npx prisma generate`, `npm test`, `npx tsc --noEmit` e `npm run build` no repositório completo, com dependências e ambiente de teste.
+- [ ] No preview, validar os perfis PACIENTE, MEDICO, ATENDENTE e ADMINISTRADOR, inclusive restrições por URL e relatórios CSV.
+- [ ] Validar filtros por período, médico, tipo e status; conferir contagens, dados ausentes e resultados exportados.
+- [ ] Validar experiência mobile: filtros sem corte, tabelas, gráficos e navegação por teclado.
+- [ ] Verificar impacto de carga em banco com dados representativos, principalmente gráficos mensais, alertas e produtividade.
+
+**Estado:** alterações de código prontas para revisão, mas integração funcional e desempenho sob carga ainda não comprovados. Não realizar merge somente com base no status de deploy.
