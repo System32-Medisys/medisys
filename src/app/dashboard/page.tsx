@@ -7,18 +7,42 @@ import { formatDateTime, formatStatus } from "@/lib/format";
 import {
   CLINIC_TIME_ZONE, getClinicDayRange, getClinicHour, getNextUpcomingAppointment,
   getDashboardPeriodRange, getDashboardDailySeries, parseDashboardPeriod,
+  getPreviousDashboardPeriodRange, calculatePeriodChange,
 } from "@/lib/dashboard";
 import styles from "./dashboard.module.css";
 
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ periodo?: string }>;
+  searchParams: Promise<{ periodo?: string; medico?: string; tipoExame?: string; statusConsulta?: string; statusExame?: string }>;
 }) {
   const session = await requirePageSession();
   const params = await searchParams;
   const period = parseDashboardPeriod(params.periodo);
+
   const isStaff = session.role === Role.ATENDENTE || session.role === Role.ADMINISTRADOR;
+  const [doctorOptions, examTypeOptions] = await Promise.all([
+    isStaff ? db.user.findMany({
+      where: { role: Role.MEDICO, status: UserStatus.ATIVO },
+      select: { id: true, fullName: true },
+      orderBy: { fullName: "asc" },
+    }) : Promise.resolve([]),
+    isStaff ? db.examType.findMany({
+      where: { active: true }, select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    }) : Promise.resolve([]),
+  ]);
+  // Os IDs e status passados na URL são validados, nunca usados diretamente.
+  const doctorId = isStaff && doctorOptions.some((item) => item.id === params.medico) ? params.medico : undefined;
+  const examTypeId = isStaff && examTypeOptions.some((item) => item.id === params.tipoExame) ? params.tipoExame : undefined;
+  const consultationStatus = Object.values(ConsultationStatus).find((item) => item === params.statusConsulta);
+  const examStatus = Object.values(ExamStatus).find((item) => item === params.statusExame);
+  const filterParams = new URLSearchParams({ periodo: period });
+  if (doctorId) filterParams.set("medico", doctorId);
+  if (examTypeId) filterParams.set("tipoExame", examTypeId);
+  if (consultationStatus) filterParams.set("statusConsulta", consultationStatus);
+  if (examStatus) filterParams.set("statusExame", examStatus);
+  const exportHref = "/dashboard/exportar?" + filterParams.toString();
   const consultationAccess: Prisma.ConsultationWhereInput = session.role === Role.PACIENTE
     ? { patientId: session.userId }
     : session.role === Role.MEDICO ? { doctorId: session.userId } : {};
@@ -31,6 +55,17 @@ export default async function DashboardPage({
   const periodRange = { gte: start, lt: end };
   const todayRange = { gte: todayStart, lt: todayEnd };
   const dayAhead = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const previousRange = getPreviousDashboardPeriodRange(now, period);
+  const analyticsConsultations: Prisma.ConsultationWhereInput = {
+    ...consultationAccess,
+    ...(doctorId ? { doctorId } : {}),
+    ...(consultationStatus ? { status: consultationStatus } : {}),
+  };
+  const analyticsExams: Prisma.ExamAppointmentWhereInput = {
+    ...examAccess,
+    ...(examTypeId ? { examTypeId } : {}),
+    ...(examStatus ? { status: examStatus } : {}),
+  };
   const pendingConsultationWhere: Prisma.ConsultationWhereInput = {
     ...consultationAccess,
     status: { in: [ConsultationStatus.AGENDADA, ConsultationStatus.CONFIRMADA] },
@@ -46,14 +81,15 @@ export default async function DashboardPage({
     todayConsultations, todayExams,
     activePatients, pendingConsultations, pendingExams,
     upcomingSoon, awaitingResults, nextConsultations, nextExams,
+    previousConsultations, previousExams, overdueConsultations, productivity,
   ] = await Promise.all([
     db.consultation.findMany({
-      where: { ...consultationAccess, scheduledAt: periodRange },
+      where: { ...analyticsConsultations, scheduledAt: periodRange },
       select: { scheduledAt: true, status: true },
       orderBy: { scheduledAt: "asc" },
     }),
     db.examAppointment.findMany({
-      where: { ...examAccess, scheduledAt: periodRange },
+      where: { ...analyticsExams, scheduledAt: periodRange },
       select: { scheduledAt: true, status: true },
       orderBy: { scheduledAt: "asc" },
     }),
@@ -100,6 +136,21 @@ export default async function DashboardPage({
       orderBy: { scheduledAt: "asc" },
       take: 1,
     }),
+    db.consultation.count({
+      where: { ...analyticsConsultations, scheduledAt: { gte: previousRange.start, lt: previousRange.end } },
+    }),
+    db.examAppointment.count({
+      where: { ...analyticsExams, scheduledAt: { gte: previousRange.start, lt: previousRange.end } },
+    }),
+    db.consultation.count({
+      where: { ...consultationAccess, status: { in: [ConsultationStatus.AGENDADA, ConsultationStatus.CONFIRMADA] }, scheduledAt: { lt: now } },
+    }),
+    isStaff ? db.consultation.groupBy({
+      by: ["doctorId"],
+      where: { ...(doctorId ? { doctorId } : {}), scheduledAt: periodRange, status: ConsultationStatus.REALIZADA },
+      _count: { _all: true },
+      orderBy: { doctorId: "asc" },
+    }) : Promise.resolve([]),
   ]);
 
   const agenda = [
