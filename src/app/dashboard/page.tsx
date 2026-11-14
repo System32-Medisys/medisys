@@ -1,6 +1,7 @@
 import { ConsultationStatus, ExamStatus, Prisma, Role, UserStatus } from "@prisma/client";
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
+import { DashboardAutoRefresh } from "./auto-refresh";
 import { requirePageSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDateTime, formatStatus } from "@/lib/format";
@@ -216,6 +217,7 @@ export default async function DashboardPage({
       subtitle={`Hoje é ${todayLabel}. Veja o resumo e as prioridades do dia.`}
       userName={session.user.fullName}
     >
+      <DashboardAutoRefresh />
       <div className={styles.toolbar}>
         <nav aria-label="Selecionar período dos indicadores" className={styles.periods}>
           {[
@@ -297,6 +299,11 @@ export default async function DashboardPage({
         </Link>
       </section>
 
+      <section className={styles.absences} aria-label="Faltas registradas no período">
+        <p><strong>{periodConsultations.filter((item) => item.status === ConsultationStatus.FALTA_PACIENTE).length}</strong> faltas de pacientes em consultas</p>
+        <p><strong>{periodConsultations.filter((item) => item.status === ConsultationStatus.FALTA_MEDICO).length}</strong> faltas de médicos em consultas</p>
+        <p><strong>{periodExams.filter((item) => item.status === ExamStatus.FALTA_PACIENTE).length}</strong> faltas de pacientes em exames</p>
+      </section>
       <section className={styles.comparison} aria-label="Comparação com período anterior">
         <p>Consultas: <strong>{calculatePeriodChange(periodConsultations.length, previousConsultations)}</strong></p>
         <p>Exames: <strong>{calculatePeriodChange(periodExams.length, previousExams)}</strong></p>
