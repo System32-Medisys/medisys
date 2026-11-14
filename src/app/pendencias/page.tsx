@@ -14,26 +14,31 @@ export default async function PendingPage() {
       : {};
   const examAccess = session.role === Role.PACIENTE ? { patientId: session.userId } : {};
 
-  const [consultations, exams] = await Promise.all([
+  const consultationWhere = {
+    ...consultationAccess,
+    status: { in: [ConsultationStatus.AGENDADA, ConsultationStatus.CONFIRMADA] },
+    scheduledAt: { gte: new Date() },
+  };
+  const examWhere = {
+    ...examAccess,
+    status: { in: [ExamStatus.AGENDADO, ExamStatus.RESULTADO_PENDENTE] },
+  };
+
+  const [consultations, exams, consultationTotal, examTotal] = await Promise.all([
     db.consultation.findMany({
-      where: {
-        ...consultationAccess,
-        status: { in: [ConsultationStatus.AGENDADA, ConsultationStatus.CONFIRMADA] },
-        scheduledAt: { gte: new Date() },
-      },
+      where: consultationWhere,
       include: { patient: { select: { fullName: true } }, doctor: { select: { fullName: true } } },
       orderBy: { scheduledAt: "asc" },
       take: 20,
     }),
     db.examAppointment.findMany({
-      where: {
-        ...examAccess,
-        status: { in: [ExamStatus.AGENDADO, ExamStatus.RESULTADO_PENDENTE] },
-      },
+      where: examWhere,
       include: { patient: { select: { fullName: true } }, examType: { select: { name: true } } },
       orderBy: { scheduledAt: "asc" },
       take: 20,
     }),
+    db.consultation.count({ where: consultationWhere }),
+    db.examAppointment.count({ where: examWhere }),
   ]);
 
   return (
@@ -45,15 +50,15 @@ export default async function PendingPage() {
       userName={session.user.fullName}
     >
       <section className="pending-summary" aria-label="Resumo das pendências">
-        <article className="mini-summary"><small>Consultas</small><strong>{consultations.length}</strong><span>Aguardando atendimento</span></article>
-        <article className="mini-summary"><small>Exames</small><strong>{exams.length}</strong><span>Agendados ou sem resultado</span></article>
-        <article className="mini-summary total"><small>Total</small><strong>{consultations.length + exams.length}</strong><span>Itens para acompanhar</span></article>
+        <article className="mini-summary"><small>Consultas</small><strong>{consultationTotal}</strong><span>Aguardando atendimento</span></article>
+        <article className="mini-summary"><small>Exames</small><strong>{examTotal}</strong><span>Agendados ou sem resultado</span></article>
+        <article className="mini-summary total"><small>Total</small><strong>{consultationTotal + examTotal}</strong><span>Itens para acompanhar</span></article>
       </section>
 
       <div className="pending-columns">
         <section className="card table-card">
           <div className="section-heading pending-heading">
-            <div><h2>Consultas pendentes</h2><p className="muted">Agendadas ou confirmadas.</p></div>
+            <div><h2>Consultas pendentes</h2><p className="muted">Agendadas ou confirmadas. Exibindo até 20 registros.</p></div>
             <Link className="text-link" href="/consultas">Ver consultas →</Link>
           </div>
           {consultations.length === 0 ? (
@@ -72,7 +77,7 @@ export default async function PendingPage() {
 
         <section className="card table-card">
           <div className="section-heading pending-heading">
-            <div><h2>Exames pendentes</h2><p className="muted">Agendados ou aguardando resultado.</p></div>
+            <div><h2>Exames pendentes</h2><p className="muted">Agendados ou aguardando resultado. Exibindo até 20 registros.</p></div>
             <Link className="text-link" href="/exames">Ver exames →</Link>
           </div>
           {exams.length === 0 ? (
