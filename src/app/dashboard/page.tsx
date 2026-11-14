@@ -98,7 +98,7 @@ export default async function DashboardPage() {
   const todayLabel = new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "full",
     timeZone: CLINIC_TIME_ZONE,
-  }).format(new Date());
+  }).format(now);
   const nextItem = getNextUpcomingAppointment([
     ...nextConsultations.map((item) => ({
       id: item.id, kind: "Consulta" as const, scheduledAt: item.scheduledAt,
@@ -120,6 +120,9 @@ export default async function DashboardPage() {
       subtitle={`Hoje é ${todayLabel}. Veja o resumo e as prioridades do dia.`}
       userName={session.user.fullName}
     >
+      <form action="/dashboard" method="get" aria-label="Atualizar indicadores">
+        <button className="text-link" type="submit">Atualizar indicadores</button>
+      </form>
       <section className="kpi-grid" aria-label="Resumo do dia">
         <Link className="kpi-card" href="/consultas">
           <span className="kpi-icon calendar-icon" aria-hidden="true">▣</span>
@@ -143,12 +146,16 @@ export default async function DashboardPage() {
         </Link>
       </section>
 
-      {nextItem && (
+      {nextItem ? (
         <Link className="daily-highlight" href={nextItem.kind === "Consulta" ? "/consultas" : "/exames"}>
           <span className="highlight-label">Próximo atendimento</span>
           <strong>{formatDateTime(nextItem.scheduledAt)} · {nextItem.title}</strong>
           <span>{nextItem.kind} · {nextItem.detail} →</span>
         </Link>
+      ) : (
+        <section className="card" aria-live="polite">
+          <p className="muted">Nenhum próximo atendimento agendado.</p>
+        </section>
       )}
 
       <div className="dashboard-grid proposal-grid">
