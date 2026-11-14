@@ -80,8 +80,8 @@ export default async function DashboardPage({
   const [
     periodConsultations, periodExams,
     todayConsultations, todayExams,
-    activePatients, pendingConsultations, pendingExams,
-    upcomingSoon, awaitingResults, nextConsultations, nextExams,
+    activePatients, pendingConsultations, pendingExamGroups,
+    upcomingSoon, nextConsultations, nextExams,
     previousConsultations, previousExams, overdueConsultations, productivity,
   ] = await Promise.all([
     db.consultation.findMany({
@@ -101,6 +101,7 @@ export default async function DashboardPage({
         doctor: { select: { fullName: true } },
       },
       orderBy: { scheduledAt: "asc" },
+      take: 6,
     }),
     db.examAppointment.findMany({
       where: { ...examAccess, scheduledAt: todayRange },
@@ -109,15 +110,17 @@ export default async function DashboardPage({
         examType: { select: { name: true } },
       },
       orderBy: { scheduledAt: "asc" },
+      take: 6,
     }),
     isStaff ? db.user.count({ where: { role: Role.PACIENTE, status: UserStatus.ATIVO } }) : Promise.resolve(0),
     db.consultation.count({ where: pendingConsultationWhere }),
-    db.examAppointment.count({ where: pendingExamWhere }),
+    db.examAppointment.groupBy({
+      by: ["status"],
+      where: pendingExamWhere,
+      _count: { _all: true },
+    }),
     db.consultation.count({
       where: { ...pendingConsultationWhere, scheduledAt: { gte: now, lt: dayAhead } },
-    }),
-    db.examAppointment.count({
-      where: { ...examAccess, status: ExamStatus.RESULTADO_PENDENTE },
     }),
     db.consultation.findMany({
       where: pendingConsultationWhere,
@@ -169,6 +172,8 @@ export default async function DashboardPage({
   ].sort((a, b) => a.scheduledAt.getTime() - b.scheduledAt.getTime()).slice(0, 6);
 
   const firstName = session.user.fullName.split(" ")[0];
+  const pendingExams = pendingExamGroups.reduce((sum, item) => sum + item._count._all, 0);
+  const awaitingResults = pendingExamGroups.find((item) => item.status === ExamStatus.RESULTADO_PENDENTE)?._count._all ?? 0;
   const pendingTotal = pendingConsultations + pendingExams;
   const hour = getClinicHour(now);
   const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
