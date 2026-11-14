@@ -92,11 +92,13 @@ describe("exportação do dashboard: perfis e filtros", () => {
       expect(exams.mock.calls[0][0].where).toMatchObject({
         examTypeId: "tipo-1", status: ExamStatus.RESULTADO_PENDENTE,
       });
-      const csv = await response.text();
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      // Response.text() remove o BOM UTF-8 durante a decodificação.
+      expect(Array.from(bytes.slice(0, 3))).toEqual([0xef, 0xbb, 0xbf]);
+      const csv = new TextDecoder().decode(bytes);
       expect(csv).toContain('"Consulta";"mes";"REALIZADA";"2"');
       expect(csv).toContain('"Exame";"mes";"RESULTADO_PENDENTE";"1"');
       expect(csv).not.toContain("paciente-1");
-      expect(csv.charCodeAt(0)).toBe(0xfeff);
     },
   );
 
