@@ -48,12 +48,26 @@ Não foi feita migração nem alteração de dados reais. As alterações remota
 - **Produtividade operacional:** para a equipe, contagem de consultas com status REALIZADA, por médico e data agendada, dentro do período selecionado. Não representa qualidade, duração ou faturamento.
 - **Pendências detalhadas:** a página de pendências diferencia exames agendados, resultados pendentes e consultas com horário ultrapassado. As categorias detalhadas não devem ser somadas aos totais gerais, pois se sobrepõem ou usam regras diferentes.
 - **Relatório CSV:** rota GET \`/dashboard/exportar\`, com autenticação, validação de filtros e apenas totais agregados por status; não inclui nomes, CPF ou dados clínicos. A exportação usa codificação UTF-8, separador ponto e vírgula e cabeçalhos de download privado. Não expõe novos dados além da visão permitida ao perfil.
-- **Atualização automática:** componente cliente atualiza os dados do servidor a cada 60 segundos, somente enquanto a aba estiver visível. Não se trata de conexão em tempo real.
+- **Atualização automática:** componente cliente atualiza os dados do servidor a cada 5 minutos (300 segundos), somente enquanto a aba estiver visível. O botão manual permanece disponível. Não se trata de conexão em tempo real.
 - **Sem migração de banco:** os recursos usam os modelos Prisma já existentes.
 
 ## Conferências obrigatórias desta etapa
 - Executar \`npm install\`, \`npx prisma generate\`, \`npm test\`, \`npx tsc --noEmit\` e \`npm run build\` localmente, com acesso às dependências.
 - Testar filtros com IDs inválidos, perfis PACIENTE e MEDICO tentando alterar parâmetros administrativos, exportação CSV sem sessão, status cancelado, período sem dados, datas próximas à meia-noite, e responsividade.
-- Revisar com a equipe a regra atual de acesso dos médicos à lista de exames (o modelo de exame não possui um campo direto \`doctorId\`).
+- Confirmar e testar a regra de `docs/02-usuarios-permissoes.md`: médicos acessam a própria agenda e podem consultar exames de todos os pacientes; o dashboard mantém essa regra.
 - Testar em staging/preview usando dados fictícios; não executar migração nem merge antes de aprovação.
 - **Situação:** alterações no GitHub precisam passar por testes de build, integração com banco e revisão de segurança para serem consideradas concluídas.
+
+
+## Revisão pré-merge (PR #10)
+
+- [x] Reduzir frequência de atualização de 1 para **5 minutos**; atualização manual preservada.
+- [x] Otimizar a consulta da agenda de hoje com `take: 6` em cada tipo, ordenando e exibindo no máximo seis linhas no total.
+- [x] Consolidar os totais de exames pendentes e resultados pendentes em uma consulta `groupBy(status)`, em vez de duas contagens independentes.
+- [ ] Executar `npm install`, `npx prisma generate`, `npm test`, `npx tsc --noEmit` e `npm run build` no repositório completo, com dependências e ambiente de teste.
+- [ ] No preview, validar os perfis PACIENTE, MEDICO, ATENDENTE e ADMINISTRADOR, inclusive restrições por URL e relatórios CSV.
+- [ ] Validar filtros por período, médico, tipo e status; conferir contagens, dados ausentes e resultados exportados.
+- [ ] Validar experiência mobile: filtros sem corte, tabelas, gráficos e navegação por teclado.
+- [ ] Verificar impacto de carga em banco com dados representativos, principalmente gráficos mensais, alertas e produtividade.
+
+**Estado:** alterações de código prontas para revisão, mas integração funcional e desempenho sob carga ainda não comprovados. Não realizar merge somente com base no status de deploy.
