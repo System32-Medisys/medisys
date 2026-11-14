@@ -1,103 +1,127 @@
-import {
-  ConsultationStatus,
-  ExamStatus,
-  Role,
-  UserStatus,
-} from "@prisma/client";
+import { ConsultationStatus, ExamStatus, Prisma, Role, UserStatus } from "@prisma/client";
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { requirePageSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDateTime, formatStatus } from "@/lib/format";
-import { CLINIC_TIME_ZONE, getClinicDayRange, getClinicHour, getNextUpcomingAppointment } from "@/lib/dashboard";
+import {
+  CLINIC_TIME_ZONE, getClinicDayRange, getClinicHour, getNextUpcomingAppointment,
+  getDashboardPeriodRange, getDashboardDailySeries, parseDashboardPeriod,
+} from "@/lib/dashboard";
+import styles from "./dashboard.module.css";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ periodo?: string }>;
+}) {
   const session = await requirePageSession();
-  const whereConsultation = session.role === Role.PACIENTE
-    ? { patientId: session.userId }
-    : session.role === Role.MEDICO
-      ? { doctorId: session.userId }
-      : {};
-  const whereExam = session.role === Role.PACIENTE ? { patientId: session.userId } : {};
+  const params = await searchParams;
+  const period = parseDashboardPeriod(params.periodo);
   const isStaff = session.role === Role.ATENDENTE || session.role === Role.ADMINISTRADOR;
+  const consultationAccess: Prisma.ConsultationWhereInput = session.role === Role.PACIENTE
+    ? { patientId: session.userId }
+    : session.role === Role.MEDICO ? { doctorId: session.userId } : {};
+  const examAccess: Prisma.ExamAppointmentWhereInput = session.role === Role.PACIENTE
+    ? { patientId: session.userId } : {};
 
   const now = new Date();
-  const { start, end } = getClinicDayRange(now);
-  const todayRange = { gte: start, lt: end };
+  const { start: todayStart, end: todayEnd } = getClinicDayRange(now);
+  const { start, end } = getDashboardPeriodRange(now, period);
+  const periodRange = { gte: start, lt: end };
+  const todayRange = { gte: todayStart, lt: todayEnd };
+  const dayAhead = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const pendingConsultationWhere: Prisma.ConsultationWhereInput = {
+    ...consultationAccess,
+    status: { in: [ConsultationStatus.AGENDADA, ConsultationStatus.CONFIRMADA] },
+    scheduledAt: { gte: now },
+  };
+  const pendingExamWhere: Prisma.ExamAppointmentWhereInput = {
+    ...examAccess,
+    status: { in: [ExamStatus.AGENDADO, ExamStatus.RESULTADO_PENDENTE] },
+  };
 
-  const [todayConsultations, todayExams, activePatients, pendingConsultations, pendingExams, nextConsultations, nextExams] =
-    await Promise.all([
-      db.consultation.findMany({
-        where: { ...whereConsultation, scheduledAt: todayRange },
-        include: {
-          patient: { select: { fullName: true } },
-          doctor: { select: { fullName: true } },
-        },
-        orderBy: { scheduledAt: "asc" },
-      }),
-      db.examAppointment.findMany({
-        where: { ...whereExam, scheduledAt: todayRange },
-        include: {
-          patient: { select: { fullName: true } },
-          examType: { select: { name: true } },
-        },
-        orderBy: { scheduledAt: "asc" },
-      }),
-      isStaff
-        ? db.user.count({ where: { role: Role.PACIENTE, status: UserStatus.ATIVO } })
-        : Promise.resolve(0),
-      db.consultation.count({
-        where: {
-          ...whereConsultation,
-          status: { in: [ConsultationStatus.AGENDADA, ConsultationStatus.CONFIRMADA] },
-          scheduledAt: { gte: now },
-        },
-      }),
-      db.examAppointment.count({
-        where: { ...whereExam, status: { in: [ExamStatus.AGENDADO, ExamStatus.RESULTADO_PENDENTE] } },
-      }),
-      db.consultation.findMany({
-        where: { ...whereConsultation, scheduledAt: { gte: now }, status: { in: [ConsultationStatus.AGENDADA, ConsultationStatus.CONFIRMADA] } },
-        include: { patient: { select: { fullName: true } }, doctor: { select: { fullName: true } } },
-        orderBy: { scheduledAt: "asc" },
-        take: 1,
-      }),
-      db.examAppointment.findMany({
-        where: { ...whereExam, scheduledAt: { gte: now }, status: ExamStatus.AGENDADO },
-        include: { patient: { select: { fullName: true } }, examType: { select: { name: true } } },
-        orderBy: { scheduledAt: "asc" },
-        take: 1,
-      }),
-    ]);
+  const [
+    periodConsultations, periodExams,
+    todayConsultations, todayExams,
+    activePatients, pendingConsultations, pendingExams,
+    upcomingSoon, awaitingResults, nextConsultations, nextExams,
+  ] = await Promise.all([
+    db.consultation.findMany({
+      where: { ...consultationAccess, scheduledAt: periodRange },
+      select: { scheduledAt: true, status: true },
+      orderBy: { scheduledAt: "asc" },
+    }),
+    db.examAppointment.findMany({
+      where: { ...examAccess, scheduledAt: periodRange },
+      select: { scheduledAt: true, status: true },
+      orderBy: { scheduledAt: "asc" },
+    }),
+    db.consultation.findMany({
+      where: { ...consultationAccess, scheduledAt: todayRange },
+      include: {
+        patient: { select: { fullName: true } },
+        doctor: { select: { fullName: true } },
+      },
+      orderBy: { scheduledAt: "asc" },
+    }),
+    db.examAppointment.findMany({
+      where: { ...examAccess, scheduledAt: todayRange },
+      include: {
+        patient: { select: { fullName: true } },
+        examType: { select: { name: true } },
+      },
+      orderBy: { scheduledAt: "asc" },
+    }),
+    isStaff ? db.user.count({ where: { role: Role.PACIENTE, status: UserStatus.ATIVO } }) : Promise.resolve(0),
+    db.consultation.count({ where: pendingConsultationWhere }),
+    db.examAppointment.count({ where: pendingExamWhere }),
+    db.consultation.count({
+      where: { ...pendingConsultationWhere, scheduledAt: { gte: now, lt: dayAhead } },
+    }),
+    db.examAppointment.count({
+      where: { ...examAccess, status: ExamStatus.RESULTADO_PENDENTE },
+    }),
+    db.consultation.findMany({
+      where: pendingConsultationWhere,
+      include: {
+        patient: { select: { fullName: true } },
+        doctor: { select: { fullName: true } },
+      },
+      orderBy: { scheduledAt: "asc" },
+      take: 1,
+    }),
+    db.examAppointment.findMany({
+      where: { ...examAccess, scheduledAt: { gte: now }, status: ExamStatus.AGENDADO },
+      include: {
+        patient: { select: { fullName: true } },
+        examType: { select: { name: true } },
+      },
+      orderBy: { scheduledAt: "asc" },
+      take: 1,
+    }),
+  ]);
 
   const agenda = [
     ...todayConsultations.map((item) => ({
-      id: item.id,
-      kind: "Consulta",
-      scheduledAt: item.scheduledAt,
+      id: item.id, kind: "Consulta" as const, scheduledAt: item.scheduledAt,
       title: session.role === Role.PACIENTE ? item.doctor.fullName : item.patient.fullName,
       detail: session.role === Role.PACIENTE ? "Consulta médica" : `Dr(a). ${item.doctor.fullName}`,
       status: formatStatus(item.status),
     })),
     ...todayExams.map((item) => ({
-      id: item.id,
-      kind: "Exame",
-      scheduledAt: item.scheduledAt,
+      id: item.id, kind: "Exame" as const, scheduledAt: item.scheduledAt,
       title: session.role === Role.PACIENTE ? item.examType.name : item.patient.fullName,
-      detail: item.examType.name,
-      status: formatStatus(item.status),
+      detail: item.examType.name, status: formatStatus(item.status),
     })),
-  ]
-    .sort((a, b) => a.scheduledAt.getTime() - b.scheduledAt.getTime())
-    .slice(0, 6);
+  ].sort((a, b) => a.scheduledAt.getTime() - b.scheduledAt.getTime()).slice(0, 6);
 
   const firstName = session.user.fullName.split(" ")[0];
   const pendingTotal = pendingConsultations + pendingExams;
-  const currentHour = getClinicHour(now);
-  const greeting = currentHour < 12 ? "Bom dia" : currentHour < 18 ? "Boa tarde" : "Boa noite";
+  const hour = getClinicHour(now);
+  const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
   const todayLabel = new Intl.DateTimeFormat("pt-BR", {
-    dateStyle: "full",
-    timeZone: CLINIC_TIME_ZONE,
+    dateStyle: "full", timeZone: CLINIC_TIME_ZONE,
   }).format(now);
   const nextItem = getNextUpcomingAppointment([
     ...nextConsultations.map((item) => ({
@@ -112,6 +136,27 @@ export default async function DashboardPage() {
     })),
   ], now);
 
+  const consultationsByStatus = [
+    { label: "Agendadas", count: periodConsultations.filter((i) => i.status === ConsultationStatus.AGENDADA).length },
+    { label: "Confirmadas", count: periodConsultations.filter((i) => i.status === ConsultationStatus.CONFIRMADA).length },
+    { label: "Realizadas", count: periodConsultations.filter((i) => i.status === ConsultationStatus.REALIZADA).length },
+    { label: "Canceladas", count: periodConsultations.filter((i) => i.status === ConsultationStatus.CANCELADA).length },
+    { label: "Reagendadas", count: periodConsultations.filter((i) => i.status === ConsultationStatus.REAGENDADA).length },
+    { label: "Faltas", count: periodConsultations.filter((i) => i.status === ConsultationStatus.FALTA_PACIENTE || i.status === ConsultationStatus.FALTA_MEDICO).length },
+  ];
+  const examsByStatus = [
+    { label: "Agendados", count: periodExams.filter((i) => i.status === ExamStatus.AGENDADO).length },
+    { label: "Realizados", count: periodExams.filter((i) => i.status === ExamStatus.REALIZADO).length },
+    { label: "Resultado pendente", count: periodExams.filter((i) => i.status === ExamStatus.RESULTADO_PENDENTE).length },
+    { label: "Resultado disponível", count: periodExams.filter((i) => i.status === ExamStatus.RESULTADO_DISPONIVEL).length },
+    { label: "Cancelados", count: periodExams.filter((i) => i.status === ExamStatus.CANCELADO).length },
+    { label: "Reagendados", count: periodExams.filter((i) => i.status === ExamStatus.REAGENDADO).length },
+    { label: "Faltas", count: periodExams.filter((i) => i.status === ExamStatus.FALTA_PACIENTE).length },
+  ];
+  const series = getDashboardDailySeries(start, end, periodConsultations, periodExams);
+  const maxDaily = Math.max(1, ...series.map((item) => Math.max(item.consultations, item.exams)));
+  const periodLabel = period === "hoje" ? "hoje" : period === "semana" ? "nesta semana" : "neste mês";
+
   return (
     <AppShell
       currentPath="/dashboard"
@@ -120,29 +165,60 @@ export default async function DashboardPage() {
       subtitle={`Hoje é ${todayLabel}. Veja o resumo e as prioridades do dia.`}
       userName={session.user.fullName}
     >
-      <form action="/dashboard" method="get" aria-label="Atualizar indicadores">
-        <button className="text-link" type="submit">Atualizar indicadores</button>
-      </form>
-      <section className="kpi-grid" aria-label="Resumo do dia">
+      <div className={styles.toolbar}>
+        <nav aria-label="Selecionar período dos indicadores" className={styles.periods}>
+          {[
+            { value: "hoje", label: "Hoje" },
+            { value: "semana", label: "Semana" },
+            { value: "mes", label: "Mês" },
+          ].map((option) => (
+            <Link
+              key={option.value}
+              href={`/dashboard?periodo=${option.value}`}
+              className={period === option.value ? styles.selectedPeriod : styles.period}
+              aria-current={period === option.value ? "page" : undefined}
+            >
+              {option.label}
+            </Link>
+          ))}
+        </nav>
+        <form action="/dashboard" method="get">
+          <input type="hidden" name="periodo" value={period} />
+          <button className="text-link" type="submit">Atualizar indicadores</button>
+        </form>
+      </div>
+
+      <section className="kpi-grid" aria-label={`Resumo ${periodLabel}`}>
         <Link className="kpi-card" href="/consultas">
           <span className="kpi-icon calendar-icon" aria-hidden="true">▣</span>
-          <span><small>Consultas hoje</small><strong>{todayConsultations.length}</strong><em>Ver agenda</em></span>
+          <span><small>Consultas {periodLabel}</small><strong>{periodConsultations.length}</strong><em>Ver consultas</em></span>
         </Link>
         <Link className="kpi-card" href="/exames">
           <span className="kpi-icon exam-icon" aria-hidden="true">✚</span>
-          <span><small>Exames hoje</small><strong>{todayExams.length}</strong><em>Ver exames</em></span>
+          <span><small>Exames {periodLabel}</small><strong>{periodExams.length}</strong><em>Ver exames</em></span>
         </Link>
         <Link className="kpi-card" href={isStaff ? "/pacientes" : "/consultas"}>
           <span className="kpi-icon patient-icon" aria-hidden="true">●</span>
           <span>
-            <small>{isStaff ? "Pacientes ativos" : "Próximas consultas"}</small>
+            <small>{isStaff ? "Pacientes ativos (total)" : "Próximas consultas"}</small>
             <strong>{isStaff ? activePatients : pendingConsultations}</strong>
             <em>{isStaff ? "Ver cadastros" : "Ver agenda"}</em>
           </span>
         </Link>
         <Link className="kpi-card warning" href="/pendencias">
           <span className="kpi-icon pending-icon" aria-hidden="true">!</span>
-          <span><small>{isStaff ? "Pendências da clínica" : "Meus acompanhamentos"}</small><strong>{pendingTotal}</strong><em>Ver itens em acompanhamento</em></span>
+          <span><small>{isStaff ? "Pendências (total)" : "Meus acompanhamentos"}</small><strong>{pendingTotal}</strong><em>Ver pendências</em></span>
+        </Link>
+      </section>
+
+      <section className={styles.alerts} aria-label="Alertas operacionais">
+        <Link href="/consultas" className={styles.alert}>
+          <strong>{upcomingSoon}</strong>
+          <span>Consultas nas próximas 24 horas</span>
+        </Link>
+        <Link href="/pendencias" className={styles.alert}>
+          <strong>{awaitingResults}</strong>
+          <span>Exames aguardando resultado</span>
         </Link>
       </section>
 
@@ -153,21 +229,58 @@ export default async function DashboardPage() {
           <span>{nextItem.kind} · {nextItem.detail} →</span>
         </Link>
       ) : (
-        <section className="card" aria-live="polite">
-          <p className="muted">Nenhum próximo atendimento agendado.</p>
-        </section>
+        <section className="card" aria-live="polite"><p className="muted">Nenhum próximo atendimento agendado.</p></section>
       )}
+
+      <div className={styles.analytics}>
+        <section className="card" aria-label="Indicadores de status">
+          <h2>Atendimentos por status — {periodLabel}</h2>
+          <div className={styles.statusColumns}>
+            <div>
+              <h3>Consultas</h3>
+              <dl className={styles.statusList}>
+                {consultationsByStatus.map((item) => (
+                  <div key={item.label}><dt>{item.label}</dt><dd>{item.count}</dd></div>
+                ))}
+              </dl>
+            </div>
+            <div>
+              <h3>Exames</h3>
+              <dl className={styles.statusList}>
+                {examsByStatus.map((item) => (
+                  <div key={item.label}><dt>{item.label}</dt><dd>{item.count}</dd></div>
+                ))}
+              </dl>
+            </div>
+          </div>
+        </section>
+        <section className="card" aria-label="Gráfico de atendimentos">
+          <h2>Movimentação de atendimentos — {periodLabel}</h2>
+          <p className="muted">Quantidade de consultas e exames agendados por dia, independentemente do status.</p>
+          <div className={styles.legend}><span>■ Consultas</span><span>■ Exames</span></div>
+          <div className={styles.chartScroll}>
+            <div className={styles.chart} role="img" aria-label={`Gráfico de ${periodLabel}: ${periodConsultations.length} consultas e ${periodExams.length} exames`}>
+              {series.map((item) => (
+                <div className={styles.chartDay} key={item.label} title={`${item.label}: ${item.consultations} consultas e ${item.exams} exames`}>
+                  <div className={styles.chartBars}>
+                    <span className={styles.consultationBar} style={{ height: `${(item.consultations / maxDaily) * 100}%` }} />
+                    <span className={styles.examBar} style={{ height: `${(item.exams / maxDaily) * 100}%` }} />
+                  </div>
+                  <small>{item.label}</small>
+                </div>
+              ))}
+            </div>
+          </div>
+          {periodConsultations.length + periodExams.length === 0 && <p className="muted">Nenhum atendimento no período.</p>}
+        </section>
+      </div>
 
       <div className="dashboard-grid proposal-grid">
         <section className="card agenda-card" aria-labelledby="today-agenda-title">
           <div className="section-heading">
-            <div>
-              <h2 id="today-agenda-title">Agenda de hoje</h2>
-              <p className="muted">Consultas e exames ordenados por horário.</p>
-            </div>
+            <div><h2 id="today-agenda-title">Agenda de hoje</h2><p className="muted">Consultas e exames ordenados por horário.</p></div>
             <Link className="text-link" href="/consultas">Ver agenda completa →</Link>
           </div>
-
           {agenda.length === 0 ? (
             <p className="empty-state">Nenhum atendimento agendado para hoje.</p>
           ) : (
@@ -175,9 +288,7 @@ export default async function DashboardPage() {
               {agenda.map((item) => (
                 <article className="agenda-row" key={`${item.kind}-${item.id}`}>
                   <time>{formatDateTime(item.scheduledAt).split(" ")[1]}</time>
-                  <span className={item.kind === "Consulta" ? "agenda-kind consultation" : "agenda-kind exam"}>
-                    {item.kind}
-                  </span>
+                  <span className={item.kind === "Consulta" ? "agenda-kind consultation" : "agenda-kind exam"}>{item.kind}</span>
                   <span className="agenda-person"><strong>{item.title}</strong><small>{item.detail}</small></span>
                   <span className="status-badge">{item.status}</span>
                 </article>
@@ -185,40 +296,19 @@ export default async function DashboardPage() {
             </div>
           )}
         </section>
-
-        <aside className="card actions-card" aria-labelledby="quick-actions-title">
-          <div className="section-heading">
-            <div>
-              <h2 id="quick-actions-title">Ações rápidas</h2>
-              <p className="muted">Atalhos para tarefas frequentes.</p>
-            </div>
-          </div>
+        <aside className="card actions-card">
+          <div className="section-heading"><div><h2>Ações rápidas</h2><p className="muted">Atalhos para tarefas frequentes.</p></div></div>
           <div className="quick-actions">
             {isStaff ? (
               <>
-                <Link className="quick-action primary-action" href="/consultas/nova">
-                  <span className="quick-action-icon" aria-hidden="true">+</span>
-                  <span><strong>Agendar consulta</strong><small>Novo atendimento médico</small></span>
-                </Link>
-                <Link className="quick-action" href="/exames/novo">
-                  <span className="quick-action-icon" aria-hidden="true">+</span>
-                  <span><strong>Agendar exame</strong><small>Novo procedimento</small></span>
-                </Link>
-                <Link className="quick-action" href="/cadastro">
-                  <span className="quick-action-icon" aria-hidden="true">+</span>
-                  <span><strong>Cadastrar paciente</strong><small>Novo cadastro no sistema</small></span>
-                </Link>
+                <Link className="quick-action primary-action" href="/consultas/nova"><span className="quick-action-icon">+</span><span><strong>Agendar consulta</strong><small>Novo atendimento médico</small></span></Link>
+                <Link className="quick-action" href="/exames/novo"><span className="quick-action-icon">+</span><span><strong>Agendar exame</strong><small>Novo procedimento</small></span></Link>
+                <Link className="quick-action" href="/cadastro"><span className="quick-action-icon">+</span><span><strong>Cadastrar paciente</strong><small>Novo cadastro no sistema</small></span></Link>
               </>
             ) : (
               <>
-                <Link className="quick-action primary-action" href="/consultas">
-                  <span className="quick-action-icon" aria-hidden="true">→</span>
-                  <span><strong>Minhas consultas</strong><small>Ver horários e status</small></span>
-                </Link>
-                <Link className="quick-action" href="/exames">
-                  <span className="quick-action-icon" aria-hidden="true">→</span>
-                  <span><strong>Exames e resultados</strong><small>Acessar informações</small></span>
-                </Link>
+                <Link className="quick-action primary-action" href="/consultas"><span className="quick-action-icon">→</span><span><strong>Minhas consultas</strong><small>Ver horários e status</small></span></Link>
+                <Link className="quick-action" href="/exames"><span className="quick-action-icon">→</span><span><strong>Exames e resultados</strong><small>Acessar informações</small></span></Link>
               </>
             )}
           </div>
