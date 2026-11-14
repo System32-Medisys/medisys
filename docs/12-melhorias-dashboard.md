@@ -22,3 +22,19 @@ Executar `npm install`, `npx prisma generate`, `npm test`, `npx tsc --noEmit` e 
 
 ## Limitações
 Não foi feita migração nem alteração de dados reais. As alterações remotas não foram executadas localmente nesta etapa; a conclusão depende dos testes de integração e de build. A atualização dos indicadores é manual, não em tempo real.
+
+
+## Evolução adicional — filtros, status, alertas e gráficos
+
+- **Período:** a página `/dashboard?periodo=hoje|semana|mes` mostra indicadores e gráficos para o dia, semana civil (segunda a domingo) ou mês civil, sempre em `America/Porto_Velho`. Valor inválido assume "hoje".
+- **Indicadores de status:** consultas e exames são agrupados pelo status atual, dentro do período da **data agendada**. Não representam necessariamente atendimentos realizados naquele dia: por exemplo, uma consulta reagendada mantém sua data original como referência.
+- **Alertas:** consultas agendadas ou confirmadas nas próximas 24 horas e exames com resultado pendente. Alertas são contagens, não notificações em tempo real.
+- **Gráficos:** barras diárias de quantidade de consultas e exames agendados no período, sem revelar nomes ou documentos; dias vazios são exibidos com valor zero.
+- **Acesso:** todas as consultas de banco utilizam os filtros de perfil já existentes. Pacientes consultam somente registros próprios; médicos somente a própria agenda de consultas, mantendo o acesso a exames conforme a regra vigente; equipe administrativa possui visão global.
+- **Escopo:** não foram adicionadas tabelas, migrações ou bibliotecas.
+
+## Validação da evolução
+- Testes unitários ampliados em `src/lib/dashboard.test.ts` para dia, semana, mês, virada de dia e série diária.
+- Necessário executar `npm install`, `npx prisma generate`, `npm test`, `npx tsc --noEmit`, `npm run build` em um ambiente com dependências e configuração disponíveis.
+- Verificar manualmente perfis, dados com e sem registros, navegação no celular, preview na Vercel e consistência com a página de pendências.
+- Não foi executada validação de integração com banco real nesta etapa. Não fazer merge antes dessas verificações.
