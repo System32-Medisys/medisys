@@ -1,4 +1,4 @@
-import { ConsultationStatus, ExamStatus, Role } from "@prisma/client";
+import { ConsultationStatus, ExamStatus, Prisma, Role } from "@prisma/client";
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { requirePageSession } from "@/lib/auth";
@@ -14,12 +14,12 @@ export default async function PendingPage() {
       : {};
   const examAccess = session.role === Role.PACIENTE ? { patientId: session.userId } : {};
 
-  const consultationWhere = {
+  const consultationWhere: Prisma.ConsultationWhereInput = {
     ...consultationAccess,
     status: { in: [ConsultationStatus.AGENDADA, ConsultationStatus.CONFIRMADA] },
     scheduledAt: { gte: new Date() },
   };
-  const examWhere = {
+  const examWhere: Prisma.ExamAppointmentWhereInput = {
     ...examAccess,
     status: { in: [ExamStatus.AGENDADO, ExamStatus.RESULTADO_PENDENTE] },
   };
