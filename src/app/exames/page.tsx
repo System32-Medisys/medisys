@@ -1,4 +1,4 @@
-import { Role } from "@prisma/client";
+import { ExamStatus, Role } from "@prisma/client";
 import Link from "next/link";
 import { AppointmentActions } from "@/components/appointment-actions";
 import { AppShell } from "@/components/app-shell";
@@ -15,7 +15,7 @@ export default async function ExamsPage() {
     include: {
       patient: { select: { fullName: true } },
       examType: { select: { name: true } },
-      results: { orderBy: { version: "desc" }, take: 1 },
+      results: { orderBy: { version: "desc" }, take: 1, select: { version: true } },
     },
     orderBy: { scheduledAt: "desc" },
   });
@@ -36,7 +36,12 @@ export default async function ExamsPage() {
             {(session.role === Role.ATENDENTE || session.role === Role.ADMINISTRADOR) &&
               <AppointmentActions key={item.status} kind="exam" id={item.id} status={item.status} />}
           </td>
-          <td>{item.results[0] ? `Versão ${item.results[0].version}` : "Pendente"}</td>
+          <td>{item.results[0] || (item.status === ExamStatus.RESULTADO_PENDENTE &&
+            (session.role === Role.ATENDENTE || session.role === Role.ADMINISTRADOR))
+            ? <Link className="text-link" prefetch={false} href={`/exames/${item.id}/resultados`}>
+                {item.results[0] ? `Ver resultado · versão ${item.results[0].version}` : "Registrar resultado"}
+              </Link>
+            : "Sem resultado"}</td>
         </tr>)}</tbody>
       </table></div>}
     </section>
