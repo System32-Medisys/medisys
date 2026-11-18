@@ -1,4 +1,4 @@
-import { ConsultationStatus, ExamStatus, Role } from "@prisma/client";
+import { ConsultationStatus, ExamStatus, Prisma, Role } from "@prisma/client";
 import { audit } from "@/lib/audit";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/http";
@@ -8,9 +8,10 @@ const inactiveExams = [ExamStatus.CANCELADO, ExamStatus.REAGENDADO];
 
 export async function createConsultation(input: {
   patientId: string; doctorId: string; scheduledAt: Date; actorId: string; actorRole: Role;
-}) {
+  rescheduledFromId?: string;
+}, transaction?: Prisma.TransactionClient) {
   if (input.scheduledAt <= new Date()) throw new AppError(400, "Não é permitido agendar no passado.");
-  return db.$transaction(async (tx) => {
+  const create = async (tx: Prisma.TransactionClient) => {
     const [patient, doctor, doctorConflict, patientConsultation, patientExam] = await Promise.all([
       tx.user.findFirst({ where: { id: input.patientId, role: Role.PACIENTE, status: "ATIVO" } }),
       tx.user.findFirst({ where: { id: input.doctorId, role: Role.MEDICO, status: "ATIVO" } }),
@@ -21,17 +22,19 @@ export async function createConsultation(input: {
     if (!patient || !doctor) throw new AppError(400, "Paciente ou médico inválido/inativo.");
     if (doctorConflict) throw new AppError(409, "O médico já possui consulta nesse horário.");
     if (patientConsultation || patientExam) throw new AppError(409, "O paciente já possui agendamento nesse horário.");
-    const consultation = await tx.consultation.create({ data: { patientId: input.patientId, doctorId: input.doctorId, scheduledAt: input.scheduledAt, createdById: input.actorId } });
+    const consultation = await tx.consultation.create({ data: { patientId: input.patientId, doctorId: input.doctorId, scheduledAt: input.scheduledAt, createdById: input.actorId, rescheduledFromId: input.rescheduledFromId } });
     await audit({ actorId: input.actorId, actorRole: input.actorRole, action: "CONSULTA_AGENDADA", entityType: "Consultation", entityId: consultation.id, patientId: input.patientId, after: { scheduledAt: input.scheduledAt } }, tx);
     return consultation;
-  });
+  };
+  return transaction ? create(transaction) : db.$transaction(create, { isolationLevel: "Serializable" });
 }
 
 export async function createExam(input: {
   patientId: string; examTypeId: string; scheduledAt: Date; actorId: string; actorRole: Role;
-}) {
+  rescheduledFromId?: string;
+}, transaction?: Prisma.TransactionClient) {
   if (input.scheduledAt <= new Date()) throw new AppError(400, "Não é permitido agendar no passado.");
-  return db.$transaction(async (tx) => {
+  const create = async (tx: Prisma.TransactionClient) => {
     const [patient, examType, consultation, exam] = await Promise.all([
       tx.user.findFirst({ where: { id: input.patientId, role: Role.PACIENTE, status: "ATIVO" } }),
       tx.examType.findFirst({ where: { id: input.examTypeId, active: true } }),
@@ -40,8 +43,9 @@ export async function createExam(input: {
     ]);
     if (!patient || !examType) throw new AppError(400, "Paciente ou tipo de exame inválido/inativo.");
     if (consultation || exam) throw new AppError(409, "O paciente já possui agendamento nesse horário.");
-    const created = await tx.examAppointment.create({ data: { patientId: input.patientId, examTypeId: input.examTypeId, scheduledAt: input.scheduledAt, createdById: input.actorId } });
+    const created = await tx.examAppointment.create({ data: { patientId: input.patientId, examTypeId: input.examTypeId, scheduledAt: input.scheduledAt, createdById: input.actorId, rescheduledFromId: input.rescheduledFromId } });
     await audit({ actorId: input.actorId, actorRole: input.actorRole, action: "EXAME_AGENDADO", entityType: "ExamAppointment", entityId: created.id, patientId: input.patientId, after: { scheduledAt: input.scheduledAt } }, tx);
     return created;
-  });
+  };
+  return transaction ? create(transaction) : db.$transaction(create, { isolationLevel: "Serializable" });
 }
