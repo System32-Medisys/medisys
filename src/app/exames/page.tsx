@@ -1,4 +1,6 @@
 import { ExamStatus, Role } from "@prisma/client";
+import { ListFilters } from "@/components/list-filters";
+import { clinicDay, field, type ListParams } from "@/lib/list-filters";
 import Link from "next/link";
 import { AppointmentActions } from "@/components/appointment-actions";
 import { AppShell } from "@/components/app-shell";
@@ -7,11 +9,16 @@ import { db } from "@/lib/db";
 import { formatDateTime, formatStatus } from "@/lib/format";
 import styles from "./exames.module.css";
 
-export default async function ExamsPage() {
+export default async function ExamsPage({ searchParams }: { searchParams: Promise<ListParams> }) {
   const session = await requirePageSession();
+  const params = await searchParams;
+  const status = Object.values(ExamStatus).find((value) => value === field(params, "status"));
   const where = session.role === Role.PACIENTE ? { patientId: session.userId } : {};
   const exams = await db.examAppointment.findMany({
-    where,
+    where: { ...where, status, scheduledAt: clinicDay(field(params,"data")),
+      ...(session.role !== Role.PACIENTE && field(params,"paciente") ? { patient: { fullName: { contains: field(params,"paciente"), mode: "insensitive" } } } : {}),
+      ...(field(params,"tipo") ? { examType: { name: { contains: field(params,"tipo"), mode: "insensitive" } } } : {}),
+    },
     include: {
       patient: { select: { fullName: true } },
       examType: { select: { name: true } },
@@ -25,6 +32,7 @@ export default async function ExamsPage() {
     {(session.role === Role.ATENDENTE || session.role === Role.ADMINISTRADOR) && <div className={styles.toolbar}>
       <Link className={styles.createButton} href="/exames/novo">Agendar exame</Link>
     </div>}
+    <ListFilters action="/exames" params={params} fields={[["data","Data (Porto Velho)","date"], ["paciente","Paciente"], ["tipo","Tipo de exame"]].filter(([key]) => key !== "paciente" || session.role !== Role.PACIENTE) as Array<[string,string,string?]>} statuses={Object.values(ExamStatus)} />
     <section className="card table-card">
       {exams.length === 0 ? <p className="empty-state">Nenhum exame encontrado.</p> : <div className="table-scroll"><table>
         <thead><tr><th>Data e hora</th>{session.role !== Role.PACIENTE && <th>Paciente</th>}<th>Tipo</th><th>Status</th><th>Resultado</th></tr></thead>

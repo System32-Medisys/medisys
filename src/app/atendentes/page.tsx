@@ -2,6 +2,7 @@ import { Role } from "@prisma/client";
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { RegistrationActions } from "@/components/registration-actions";
+import { AccountAccess } from "@/components/account-access";
 import { requirePageRole } from "@/lib/auth";
 import { db } from "@/lib/db";
 import styles from "./atendentes.module.css";
@@ -14,7 +15,7 @@ export default async function AttendantsPage() {
     <section className="card table-card">
       {attendants.length === 0 ? <p className="empty-state">Nenhum atendente cadastrado.</p> : <div className="table-scroll"><table>
         <thead><tr><th>Nome</th><th>CPF</th><th>Telefone</th><th>E-mail</th><th>Status</th><th>Ações</th></tr></thead>
-        <tbody>{attendants.map((item) => <tr key={item.id}><td>{item.fullName}</td><td>{item.cpf}</td><td>{item.phone}</td><td>{item.email || "—"}</td><td><span className="status-badge">{item.status.toLowerCase()}</span></td><td><RegistrationActions active={item.status === "ATIVO"} id={item.id} /></td></tr>)}</tbody>
+        <tbody>{attendants.map((item) => <tr key={item.id}><td>{item.fullName}</td><td>{item.cpf}</td><td>{item.phone}</td><td>{item.email || "—"}</td><td><span className="status-badge">{item.status.toLowerCase()}</span></td><td><RegistrationActions active={item.status === "ATIVO"} id={item.id} />{session.role === Role.ADMINISTRADOR && item.status !== "INATIVO" && <AccountAccess id={item.id} blocked={item.status === "BLOQUEADO"} />}</td></tr>)}</tbody>
       </table></div>}
     </section>
   </AppShell>;
