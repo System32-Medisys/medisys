@@ -1,4 +1,4 @@
-import { ExamStatus } from "@prisma/client";
+import { ExamStatus, Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { audit } from "@/lib/audit";
@@ -8,9 +8,9 @@ import { apiError, AppError } from "@/lib/http";
 import { authorize, permissions } from "@/lib/rbac";
 
 const schema = z.object({
-  content: z.string().trim().min(1),
-  resultDate: z.coerce.date().optional(),
-  fileUrl: z.string().trim().url().optional(),
+  content: z.string().trim().min(1).max(10000),
+  resultDate: z.union([z.iso.date(), z.iso.datetime()]).transform((value) => new Date(value)).optional(),
+  fileUrl: z.url({ protocol: /^https$/ }).max(2048).optional(),
 });
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
@@ -36,7 +36,12 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       }
       await audit({ actorId: session.userId, actorRole: session.role, action: previous ? "RESULTADO_CORRIGIDO" : "RESULTADO_REGISTRADO", entityType: "ExamResultVersion", entityId: created.id, patientId: exam.patientId, before: previous ? { version: previous.version } : undefined, after: { version: created.version } }, tx);
       return { id: created.id, version: created.version, createdAt: created.createdAt };
-    });
+    }, { isolationLevel: "Serializable" });
     return NextResponse.json(result, { status: 201 });
-  } catch (error) { return apiError(error); }
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && ["P2002", "P2034"].includes(error.code)) {
+      return apiError(new AppError(409, "Outro resultado foi salvo simultaneamente. Atualize a página e confira a última versão."));
+    }
+    return apiError(error);
+  }
 }
