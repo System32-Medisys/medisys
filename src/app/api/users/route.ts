@@ -23,12 +23,17 @@ export async function POST(request: Request) {
     if ((input.role === Role.ATENDENTE || input.role === Role.ADMINISTRADOR) && session.role !== Role.ADMINISTRADOR) throw new AppError(403, "Somente administradores cadastram atendentes ou administradores.");
     authorize(session.role, input.role === Role.PACIENTE || input.role === Role.MEDICO ? permissions.managePatientsAndDoctors : permissions.manageUsers);
     const user = await db.$transaction(async (tx) => {
+      if (input.role === Role.MEDICO) {
+        const ids = [...new Set(input.specialtyIds!)];
+        const count = await tx.specialty.count({ where: { id: { in: ids }, active: true } });
+        if (count !== ids.length) throw new AppError(400, "Selecione somente especialidades ativas.");
+      }
       const created = await tx.user.create({ data: {
         cpf: input.cpf, fullName: input.fullName, birthDate: input.birthDate, phone: input.phone,
         email: input.email, sex: input.sex, healthInsurance: input.healthInsurance,
         passwordHash: await hashPassword(input.password), role: input.role,
         address: { create: input.address },
-        doctor: input.role === Role.MEDICO ? { create: { crm: input.crm!, crmState: input.crmState!, serviceDays: input.serviceDays, specialties: { create: input.specialtyIds!.map((specialtyId) => ({ specialtyId })) } } } : undefined,
+        doctor: input.role === Role.MEDICO ? { create: { crm: input.crm!, crmState: input.crmState!, serviceDays: input.serviceDays, specialties: { create: [...new Set(input.specialtyIds!)].map((specialtyId) => ({ specialtyId })) } } } : undefined,
       }, select: { id: true, cpf: true, fullName: true, role: true, status: true } });
       await audit({ actorId: session.userId, actorRole: session.role, action: "USUARIO_CADASTRADO", entityType: "User", entityId: created.id, patientId: input.role === Role.PACIENTE ? created.id : undefined, after: created }, tx);
       return created;
