@@ -1,5 +1,6 @@
 import { Role, UserStatus } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { audit } from "@/lib/audit";
 import { requireSession } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -56,7 +57,31 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     const session = await requireSession();
     const { id } = await context.params;
     const current = await getManagedUser(id, session.role);
-    const input = userUpdateSchema.parse(await request.json());
+    const payload = await request.json();
+    if (Object.keys(payload).every((key) => key === "status") && payload.status) {
+      const { status } = z.object({ status: z.enum(["ATIVO", "INATIVO"]) }).parse(payload);
+      const updated = await db.$transaction(async (tx) => {
+        const user = await tx.user.update({
+          where: { id },
+          data: { status: UserStatus[status] },
+          select: { id: true, fullName: true, role: true, status: true },
+        });
+        await audit({
+          actorId: session.userId,
+          actorRole: session.role,
+          action: status === "INATIVO" ? "USUARIO_DESATIVADO" : "USUARIO_REATIVADO",
+          entityType: "User",
+          entityId: id,
+          patientId: current.role === Role.PACIENTE ? id : undefined,
+          before: { status: current.status },
+          after: { status: user.status },
+        }, tx);
+        return user;
+      });
+      return NextResponse.json({ message: status === "INATIVO" ? "Cadastro desativado com sucesso." : "Cadastro reativado com sucesso.", user: updated });
+    }
+
+    const input = userUpdateSchema.parse(payload);
 
     if (current.role === Role.MEDICO) {
       if (!input.crm || !input.crmState || !input.email || !input.specialtyIds?.length) {
