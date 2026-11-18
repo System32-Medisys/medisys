@@ -12,9 +12,10 @@ export async function POST(request: Request) {
     const session = await requireSession({ allowPasswordChange: true });
     const input = schema.parse(await request.json());
     if (!(await verifyPassword(input.currentPassword, session.user.passwordHash))) throw new AppError(400, "Senha atual incorreta.");
-    await db.user.update({ where: { id: session.userId }, data: { passwordHash: await hashPassword(input.newPassword), mustChangePassword: false } });
+    const passwordHash = await hashPassword(input.newPassword);
+    await db.user.update({ where: { id: session.userId, passwordHash: session.user.passwordHash }, data: { passwordHash, mustChangePassword: false } });
     await audit({ actorId: session.userId, actorRole: session.role, action: "SENHA_ALTERADA" });
-    await createSession({ userId: session.userId, role: session.role, mustChangePassword: false });
+    await createSession({ userId: session.userId, role: session.role, mustChangePassword: false }, passwordHash);
     return NextResponse.json({ message: "Senha alterada com sucesso." });
   } catch (error) { return apiError(error); }
 }

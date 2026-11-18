@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     }
 
     await db.user.update({ where: { id: user.id }, data: { failedLoginCount: 0 } });
-    await createSession({ userId: user.id, role: user.role, mustChangePassword: user.mustChangePassword });
+    await createSession({ userId: user.id, role: user.role, mustChangePassword: user.mustChangePassword }, user.passwordHash);
     await audit({ actorId: user.id, actorRole: user.role, action: "LOGIN_REALIZADO" });
     return NextResponse.json({ role: user.role, mustChangePassword: user.mustChangePassword });
   } catch (error) { return apiError(error); }

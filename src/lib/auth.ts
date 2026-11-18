@@ -1,5 +1,6 @@
 import { Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { createHmac } from "node:crypto";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -21,8 +22,12 @@ export async function verifyPassword(password: string, hash: string) {
   return bcrypt.compare(password, hash);
 }
 
-export async function createSession(session: Session) {
-  const token = await new SignJWT(session)
+function passwordStamp(passwordHash: string) {
+  return createHmac("sha256", secret).update(passwordHash).digest("base64url");
+}
+
+export async function createSession(session: Session, passwordHash: string) {
+  const token = await new SignJWT({ ...session, passwordStamp: passwordStamp(passwordHash) })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("8h")
@@ -42,12 +47,12 @@ export async function destroySession() {
   cookieStore.delete(COOKIE_NAME);
 }
 
-export async function getSession(): Promise<Session | null> {
+export async function getSession(): Promise<(Session & { passwordStamp?: string }) | null> {
   const token = (await cookies()).get(COOKIE_NAME)?.value;
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, secret);
-    return payload as unknown as Session;
+    return payload as unknown as Session & { passwordStamp?: string };
   } catch {
     return null;
   }
@@ -57,20 +62,20 @@ export async function requireSession(options?: { allowPasswordChange?: boolean }
   const session = await getSession();
   if (!session) throw new AppError(401, "Sessão inválida ou expirada.");
   const user = await db.user.findUnique({ where: { id: session.userId } });
-  if (!user || user.status !== "ATIVO") throw new AppError(401, "Usuário inativo ou bloqueado.");
+  if (!user || user.status !== "ATIVO" || session.passwordStamp !== passwordStamp(user.passwordHash)) throw new AppError(401, "Sessão inválida ou expirada.");
   if (user.mustChangePassword && !options?.allowPasswordChange) {
     throw new AppError(403, "Troque a senha do primeiro acesso antes de continuar.");
   }
-  return { ...session, mustChangePassword: user.mustChangePassword, user };
+  return { userId: user.id, role: user.role, mustChangePassword: user.mustChangePassword, user };
 }
 
 export async function requirePageSession() {
   const session = await getSession();
   if (!session) redirect("/login");
   const user = await db.user.findUnique({ where: { id: session.userId } });
-  if (!user || user.status !== "ATIVO") redirect("/login");
+  if (!user || user.status !== "ATIVO" || session.passwordStamp !== passwordStamp(user.passwordHash)) redirect("/login");
   if (user.mustChangePassword) redirect("/trocar-senha");
-  return { ...session, mustChangePassword: user.mustChangePassword, user };
+  return { userId: user.id, role: user.role, mustChangePassword: user.mustChangePassword, user };
 }
 
 export async function requirePageRole(allowed: readonly Role[]) {
