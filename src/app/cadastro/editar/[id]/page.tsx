@@ -19,7 +19,7 @@ export default async function EditRegistrationPage({ params }: { params: Promise
   if (!allowed) notFound();
 
   const specialties = user.role === Role.MEDICO
-    ? await db.specialty.findMany({ where: { active: true }, select: { id: true, name: true }, orderBy: { name: "asc" } })
+    ? await db.specialty.findMany({ where: { OR: [{ active: true }, { id: { in: user.doctor?.specialties.map((item) => item.specialtyId) ?? [] } }] }, select: { id: true, name: true }, orderBy: { name: "asc" } })
     : [];
   const destination = user.role === Role.PACIENTE ? "/pacientes" : user.role === Role.MEDICO ? "/medicos" : "/atendentes";
   const roleLabel = user.role === Role.PACIENTE ? "paciente" : user.role === Role.MEDICO ? "médico" : "atendente";
