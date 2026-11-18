@@ -9,14 +9,14 @@ export function RegistrationActions({ id, active }: { id: string; active: boolea
   const [loading, setLoading] = useState(false);
 
   async function changeStatus() {
-    const action = active ? "desativar" : "reativar";
+    const action = "desativar";
     if (!window.confirm(`Deseja realmente ${action} este cadastro? O histórico será preservado.`)) return;
     setLoading(true);
     try {
       const response = await fetch(`/api/users/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: active ? "INATIVO" : "ATIVO" }),
+        body: JSON.stringify({ status: "INATIVO" }),
       });
       const result = await response.json().catch(() => null);
       if (!response.ok) throw new Error(result?.error ?? "Não foi possível alterar o cadastro.");
@@ -31,9 +31,9 @@ export function RegistrationActions({ id, active }: { id: string; active: boolea
   return (
     <span className="registration-actions">
       <Link className="table-action edit" href={`/cadastro/editar/${id}`}>Editar</Link>
-      <button className={active ? "table-action deactivate" : "table-action reactivate"} disabled={loading} onClick={changeStatus} type="button">
-        {loading ? "Aguarde..." : active ? "Desativar" : "Reativar"}
-      </button>
+      {active && <button className="table-action deactivate" disabled={loading} onClick={changeStatus} type="button">
+        {loading ? "Aguarde..." : "Desativar"}
+      </button>}
     </span>
   );
 }
