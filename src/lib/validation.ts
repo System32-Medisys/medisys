@@ -91,3 +91,34 @@ export const consultationScheduleSchema = scheduleSchema.extend({
 export const examScheduleSchema = scheduleSchema.extend({
   examTypeId: z.string().min(1, "Selecione um tipo de exame."),
 });
+
+
+export const userUpdateSchema = z.object({
+  cpf: cpfSchema,
+  fullName: z.string().trim().min(3, "O nome deve possuir pelo menos 3 caracteres.").regex(/^[^\d]+$/, "O nome não pode conter números."),
+  birthDate: z.coerce.date({ error: "Informe uma data de nascimento válida." }).refine((date) => date <= new Date(), "A data de nascimento não pode estar no futuro."),
+  phone: phoneSchema,
+  email: z.string().email("Informe um endereço de e-mail válido.").optional(),
+  sex: z.string().optional(),
+  healthInsurance: z.string().optional(),
+  address: z.object({
+    zipCode: z.string().transform((value) => value.replace(/\D/g, "")).refine((value) => value.length === 8, "O CEP deve possuir 8 dígitos."),
+    street: z.string().trim().min(2),
+    number: z.string().trim().min(1),
+    complement: z.string().optional(),
+    neighborhood: z.string().trim().min(2),
+    city: z.string().trim().min(2),
+    state: stateSchema,
+  }),
+  crm: z.string().regex(/^\d+$/, "O CRM deve conter somente números.").optional(),
+  crmState: stateSchema.optional(),
+  specialtyIds: z.array(z.string()).optional(),
+  serviceDays: z.string().optional(),
+  status: z.enum(["ATIVO", "INATIVO"]).optional(),
+});
+
+export const catalogSchema = z.object({
+  name: z.string().trim().min(2, "O nome deve possuir pelo menos 2 caracteres."),
+  description: z.string().trim().min(2, "A descrição deve possuir pelo menos 2 caracteres.").optional(),
+  active: z.boolean().optional(),
+});
