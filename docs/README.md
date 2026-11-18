@@ -17,5 +17,6 @@
 15. [Stack técnica, tecnologias e metodologias](11-stack-tecnica-tecnologias-metodologias.md)
 16. [Melhorias do dashboard](12-melhorias-dashboard.md)
 17. [Atualização e desativação de cadastros](13-atualizacao-desativacao-cadastros.md)
+18. [Modelagem do banco de dados](16-modelagem-banco.md)
 
 Os documentos antigos duplicados foram removidos para evitar contradições.

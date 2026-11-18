@@ -33,6 +33,8 @@ Next.js, React, TypeScript, CSS, PostgreSQL do Supabase, Prisma, Zod, bcrypt e J
 ## Banco
 O sistema utiliza PostgreSQL do Supabase por meio do Prisma. O banco existente será atualizado por migração, sem recriação completa.
 
+A estrutura das tabelas e seus relacionamentos está documentada em [Modelagem do banco de dados](16-modelagem-banco.md).
+
 O seed já cria o primeiro administrador acadêmico, com troca obrigatória da senha inicial.
 
 ## Próximos passos
