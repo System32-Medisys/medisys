@@ -63,7 +63,7 @@ export function EditUserForm({
       },
       crm: isDoctor ? String(form.get("crm") ?? "") : undefined,
       crmState: isDoctor ? String(form.get("crmState") ?? "") : undefined,
-      specialtyIds: isDoctor ? [String(form.get("specialtyId") ?? "")] : undefined,
+      specialtyIds: isDoctor ? form.getAll("specialtyId").map(String) : undefined,
       serviceDays: isDoctor ? optional("serviceDays") : undefined,
     };
     try {
@@ -109,8 +109,8 @@ export function EditUserForm({
               <label>CRM<input defaultValue={user.crm ?? ""} name="crm" required /></label>
               <label>UF do CRM<input defaultValue={user.crmState ?? ""} maxLength={2} name="crmState" required /></label>
               <label>Especialidade
-                <select defaultValue={user.specialtyIds[0] ?? ""} name="specialtyId" required>
-                  <option disabled value="">Selecione</option>
+                <select defaultValue={user.specialtyIds} multiple name="specialtyId" required>
+
                   {specialties.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
                 </select>
               </label>
