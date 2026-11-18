@@ -15,5 +15,7 @@
 13. [Controles e auditoria](09-lgpd-auditoria.md)
 14. [Escopo do MVP](10-escopo-mvp.md)
 15. [Stack técnica, tecnologias e metodologias](11-stack-tecnica-tecnologias-metodologias.md)
+16. [Melhorias do dashboard](12-melhorias-dashboard.md)
+17. [Atualização e desativação de cadastros](13-atualizacao-desativacao-cadastros.md)
 
 Os documentos antigos duplicados foram removidos para evitar contradições.
