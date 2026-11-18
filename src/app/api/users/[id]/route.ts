@@ -58,18 +58,18 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     const { id } = await context.params;
     const current = await getManagedUser(id, session.role);
     const payload = await request.json();
-    if (Object.keys(payload).every((key) => key === "status") && payload.status) {
-      const { status } = z.object({ status: z.enum(["ATIVO", "INATIVO"]) }).parse(payload);
+    if (payload && typeof payload === "object" && Object.keys(payload).every((key) => key === "status") && payload.status) {
+      const { status } = z.object({ status: z.literal("INATIVO") }).parse(payload);
       const updated = await db.$transaction(async (tx) => {
         const user = await tx.user.update({
-          where: { id },
-          data: { status: UserStatus[status] },
+          where: { id, status: UserStatus.ATIVO },
+          data: { status },
           select: { id: true, fullName: true, role: true, status: true },
         });
         await audit({
           actorId: session.userId,
           actorRole: session.role,
-          action: status === "INATIVO" ? "USUARIO_DESATIVADO" : "USUARIO_REATIVADO",
+          action: "USUARIO_DESATIVADO",
           entityType: "User",
           entityId: id,
           patientId: current.role === Role.PACIENTE ? id : undefined,
@@ -78,9 +78,10 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
         }, tx);
         return user;
       });
-      return NextResponse.json({ message: status === "INATIVO" ? "Cadastro desativado com sucesso." : "Cadastro reativado com sucesso.", user: updated });
+      return NextResponse.json({ message: "Cadastro desativado com sucesso.", user: updated });
     }
 
+    if (payload && typeof payload === "object" && "status" in payload) throw new AppError(400, "Use a ação de desativação separadamente.");
     const input = userUpdateSchema.parse(payload);
 
     if (current.role === Role.MEDICO) {
@@ -88,7 +89,10 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
         throw new AppError(400, "CRM, UF, e-mail e especialidade são obrigatórios para médicos.");
       }
       const activeSpecialties = await db.specialty.count({
-        where: { id: { in: input.specialtyIds }, active: true },
+        where: { id: { in: input.specialtyIds }, OR: [
+          { active: true },
+          { id: { in: current.doctor?.specialties.map((item) => item.specialtyId) ?? [] } },
+        ] },
       });
       if (activeSpecialties !== new Set(input.specialtyIds).size) {
         throw new AppError(400, "Selecione somente especialidades ativas.");
@@ -106,7 +110,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
           email: input.email,
           sex: current.role === Role.ATENDENTE ? null : input.sex,
           healthInsurance: current.role === Role.ATENDENTE ? null : input.healthInsurance,
-          status: input.status ? UserStatus[input.status] : undefined,
+
           address: {
             upsert: {
               create: input.address,
@@ -120,18 +124,14 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
               serviceDays: input.serviceDays,
               specialties: {
                 deleteMany: {},
-                create: input.specialtyIds!.map((specialtyId) => ({ specialtyId })),
+                create: [...new Set(input.specialtyIds!)].map((specialtyId) => ({ specialtyId })),
               },
             },
           } : undefined,
         },
         select: { id: true, cpf: true, fullName: true, role: true, status: true, phone: true, email: true },
       });
-      const action = input.status === "INATIVO" && current.status !== UserStatus.INATIVO
-        ? "USUARIO_DESATIVADO"
-        : input.status === "ATIVO" && current.status !== UserStatus.ATIVO
-          ? "USUARIO_REATIVADO"
-          : "USUARIO_ATUALIZADO";
+      const action = "USUARIO_ATUALIZADO";
       await audit({
         actorId: session.userId,
         actorRole: session.role,
