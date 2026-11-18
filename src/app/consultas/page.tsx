@@ -1,5 +1,6 @@
 import { Role } from "@prisma/client";
 import Link from "next/link";
+import { AppointmentActions } from "@/components/appointment-actions";
 import { AppShell } from "@/components/app-shell";
 import { requirePageSession } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -31,7 +32,10 @@ export default async function ConsultationsPage() {
           <td>{formatDateTime(item.scheduledAt)}</td>
           {session.role !== Role.PACIENTE && <td>{item.patient.fullName}</td>}
           {session.role !== Role.MEDICO && <td>{item.doctor.fullName}</td>}
-          <td><span className="status-badge">{formatStatus(item.status)}</span></td>
+          <td><span className="status-badge">{formatStatus(item.status)}</span>
+            {(session.role === Role.ATENDENTE || session.role === Role.ADMINISTRADOR) &&
+              <AppointmentActions key={item.status} kind="consultation" id={item.id} status={item.status} />}
+          </td>
         </tr>)}</tbody>
       </table></div>}
     </section>
