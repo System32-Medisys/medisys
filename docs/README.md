@@ -22,5 +22,6 @@
 20. [Workflow de autenticação](18-workflow-autenticacao.md)
 21. [Workflow de cadastro e desativação](19-workflow-cadastros.md)
 22. [Workflow de agendamentos](20-workflow-agendamentos.md)
+23. [Workflow de exames e resultados](21-workflow-resultados-exames.md)
 
 Os documentos antigos duplicados foram removidos para evitar contradições.
