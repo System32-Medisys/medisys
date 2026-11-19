@@ -197,6 +197,33 @@ a.kpi-card:hover, a.kpi-card:focus-visible {
 .kpi-card small { color: var(--muted); font-size: .72rem; font-weight: 700; }
 .kpi-card strong { color: var(--ink); font-size: 1.85rem; line-height: 1; letter-spacing: -.04em; }
 .kpi-card em { color: var(--brand-dark); font-size: .67rem; font-style: normal; font-weight: 700; }
+.dashboard-interactions > * { animation: dashboard-rise-in .42s ease both; }
+.dashboard-interactions .card, .dashboard-interactions button, .dashboard-interactions .absences p,
+.dashboard-interactions .comparison p, .dashboard-interactions .statusColumns > div { animation: dashboard-rise-in .42s ease both; }
+.dashboard-interactions .kpi-card, .dashboard-interactions .alert, .dashboard-interactions .daily-highlight,
+.dashboard-interactions .quick-action, .dashboard-interactions .period, .dashboard-interactions .selectedPeriod,
+.dashboard-interactions .dashboard-refresh-button { animation: dashboard-rise-in .42s ease both; transition: background-color .24s ease, color .24s ease, border-color .24s ease, transform .24s ease, box-shadow .24s ease; }
+.dashboard-interactions .kpi-card { animation-delay: .06s; }
+.dashboard-interactions .kpi-card:nth-child(2) { animation-delay: .1s; }
+.dashboard-interactions .kpi-card:nth-child(3) { animation-delay: .14s; }
+.dashboard-interactions .kpi-card:nth-child(4) { animation-delay: .18s; }
+.dashboard-interactions a.is-loading { position: relative; background: var(--brand) !important; border-color: var(--brand) !important; color: #fff !important; box-shadow: 0 8px 20px rgba(11,143,125,.2); }
+.dashboard-interactions nav:has(a.is-loading) a[aria-current="page"] { background: transparent; color: var(--muted); }
+.dashboard-interactions a.is-loading strong, .dashboard-interactions a.is-loading small,
+.dashboard-interactions a.is-loading em, .dashboard-interactions a.is-loading > span,
+.dashboard-interactions a.is-loading .highlight-label { color: #fff !important; }
+.dashboard-interactions a.is-loading .kpi-icon, .dashboard-interactions a.is-loading .quick-action-icon { color: var(--brand-dark) !important; background: rgba(255,255,255,.88) !important; }
+.dashboard-interactions .dashboard-inline-spinner { display: block; width: 17px; height: 17px; flex: 0 0 17px; margin-left: auto; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: dashboard-spin .7s linear infinite; }
+.dashboard-refresh-button { color: #fff !important; background: var(--brand); padding: 12px 16px; border-radius: 10px; }
+.dashboard-refresh-button:hover { background: var(--brand-dark); }
+@keyframes dashboard-spin { to { transform: rotate(360deg); } }
+@keyframes dashboard-rise-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-interactions > *, .dashboard-interactions .kpi-card, .dashboard-interactions .alert,
+  .dashboard-interactions .daily-highlight, .dashboard-interactions .quick-action,
+  .dashboard-interactions .period, .dashboard-interactions .selectedPeriod { animation: none; transition: none; }
+  .dashboard-inline-spinner { animation-duration: 1.8s; }
+}
 .kpi-icon {
   width: 42px;
   height: 42px;
