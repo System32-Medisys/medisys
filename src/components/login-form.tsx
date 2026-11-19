@@ -2,11 +2,13 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { formatCpfInput } from "@/lib/cpf";
 
 export function LoginForm() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [cpf, setCpf] = useState("");
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setLoading(true); setError("");
     const form = new FormData(event.currentTarget);
@@ -30,7 +32,7 @@ export function LoginForm() {
     }
   }
   return <form onSubmit={submit} className="card form" aria-busy={loading}>
-    <label>CPF<input name="cpf" inputMode="numeric" placeholder="000.000.000-00" required /></label>
+    <label>CPF<input name="cpf" inputMode="numeric" autoComplete="username" maxLength={14} value={cpf} onChange={(event) => setCpf(formatCpfInput(event.target.value))} placeholder="000.000.000-00" required /></label>
     <label>Senha<input name="password" type="password" minLength={6} required /></label>
     {error && <p className="error" role="alert">{error}</p>}
     <button disabled={loading}>{loading ? "Entrando..." : "Entrar"}</button>
