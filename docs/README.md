@@ -20,5 +20,6 @@
 18. [Modelagem do banco de dados](16-modelagem-banco.md)
 19. [Casos de uso](17-casos-de-uso.md)
 20. [Workflow de autenticação](18-workflow-autenticacao.md)
+21. [Workflow de cadastro e desativação](19-workflow-cadastros.md)
 
 Os documentos antigos duplicados foram removidos para evitar contradições.
