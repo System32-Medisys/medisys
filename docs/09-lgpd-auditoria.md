@@ -18,7 +18,6 @@
 - Mudança de status;
 - Registro e correção de resultados;
 - Visualização de resultados;
-- Mudança de perfil.
 
 ## Dados do registro
 Identificador, usuário, perfil, ação, registro afetado, data, horário, resultado, justificativa e valores anterior e novo quando houver alteração.

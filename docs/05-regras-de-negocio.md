@@ -3,7 +3,7 @@
 - **RN01:** cada usuário terá um dos quatro perfis fixos e um status;
 - **RN02:** CPF será válido e único;
 - **RN03:** CRM e UF formarão combinação única;
-- **RN04:** senha terá no mínimo seis dígitos e será trocada no primeiro acesso;
+- **RN04:** senha terá no mínimo seis caracteres e será trocada no primeiro acesso; senhas temporárias redefinidas pelo administrador terão no mínimo doze caracteres;
 - **RN05:** conta será bloqueada após cinco tentativas;
 - **RN06:** somente administrador redefinirá senha e desbloqueará conta;
 - **RN07:** desbloqueio zerará tentativas e será auditado;

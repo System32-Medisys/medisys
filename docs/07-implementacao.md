@@ -20,7 +20,9 @@ Next.js, React, TypeScript, CSS, PostgreSQL do Supabase, Prisma, Zod, bcrypt e J
 8. Abra `http://localhost:3000`.
 
 ## Rotas principais
-`/login`, `/trocar-senha`, `/dashboard`, `/cadastro`, `/cadastro/atendente`, `/consultas`, `/consultas/nova`, `/exames`, `/exames/novo`, `/pacientes`, `/medicos`, `/atendentes`, `/tipos-exames`, `/auditoria`, `/configuracoes`, `/api/health`, `/api/users`, `/api/consultations`, `/api/exams`, `/api/exams/[id]/results`, `/api/exam-types` e `/api/audit`.
+Páginas: `/login`, `/trocar-senha`, `/dashboard`, `/dashboard/exportar`, `/busca`, `/pendencias`, `/cadastro`, `/cadastro/atendente`, `/cadastro/editar/[id]`, `/consultas`, `/consultas/nova`, `/exames`, `/exames/novo`, `/exames/[id]/resultados`, `/pacientes`, `/medicos`, `/atendentes`, `/tipos-exames`, `/auditoria` e `/configuracoes`.
+
+APIs: `/api/health`, `/api/auth/login`, `/api/auth/logout`, `/api/auth/change-password`, `/api/users`, `/api/users/[id]`, `/api/users/[id]/access`, `/api/consultations`, `/api/consultations/[id]`, `/api/exams`, `/api/exams/[id]`, `/api/exams/[id]/results`, `/api/exam-types`, `/api/exam-types/[id]`, `/api/specialties`, `/api/specialties/[id]` e `/api/audit`.
 
 ## Navegação
 - O menu autenticado mostra apenas os módulos permitidos para o perfil conectado;
@@ -37,8 +39,13 @@ A estrutura das tabelas e seus relacionamentos está documentada em [Modelagem d
 
 O seed já cria o primeiro administrador acadêmico, com troca obrigatória da senha inicial.
 
-## Próximos passos
-- Implementar pesquisas e mensagens;
-- Completar desativação, reagendamento, cancelamento e registro de faltas;
-- Implementar arquivo opcional do resultado;
-- Ampliar os testes.
+## Estado atual
+- Busca geral implementada com controle por perfil;
+- Mensagens de validação, sucesso e acesso negado implementadas;
+- Atualização e desativação de usuários implementadas;
+- Cancelamento, reagendamento, faltas e históricos implementados;
+- Resultados versionados com link HTTPS opcional implementados;
+- Redefinição de senha e desbloqueio exclusivos do administrador implementados;
+- Auditoria disponível para o administrador.
+
+As pendências atuais são testes manuais integrados, validação do ambiente de entrega e correção dos avisos CSS não bloqueantes do dashboard.

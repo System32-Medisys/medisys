@@ -25,7 +25,7 @@ Paciente, Atendente, Médico e Administrador.
 - MVP terá pesquisas, mensagens e auditoria.
 
 ## Pendências da entrega
-- Protótipos e diagramas;
-- Migração validada;
-- Formulários e fluxos completos;
-- Testes do MVP.
+- Executar os testes manuais dos quatro perfis com contas fictícias;
+- Validar a conexão e as migrações no ambiente de entrega;
+- Confirmar o deploy da `main` e repetir os fluxos críticos no celular;
+- Corrigir os avisos de compatibilidade CSS indicados pela compilação.

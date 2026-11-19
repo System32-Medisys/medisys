@@ -28,13 +28,20 @@
 - Mensagens de sucesso e erro na interface;
 - Testes das validações de agendamento.
 
+## 19/11/2026 — Documentação e validação técnica
+- Modelagem do banco conferida com o schema Prisma;
+- Casos de uso e workflows de autenticação, cadastros, agendamentos, resultados e auditoria;
+- Resultados de exames com versionamento e arquivo HTTPS opcional documentados;
+- Índice, rotas e estado da implementação revisados;
+- 26 testes automatizados aprovados;
+- Compilação de produção concluída com avisos não bloqueantes de CSS.
+
 ## Próximos passos
-- Implementar atualização e desativação de cadastros;
-- Implementar reagendamento, cancelamento e registro de faltas;
-- Implementar resultados de exames e arquivos opcionais;
-- Criar protótipos e diagramas;
-- Ampliar os testes;
-- Validar o MVP completo.
+- Executar os cenários manuais descritos em `15-validacao-entrega-mvp.md`;
+- Validar banco, migrações e variáveis no ambiente de entrega;
+- Repetir os fluxos críticos no celular;
+- Corrigir os avisos CSS do dashboard;
+- Confirmar o deploy final da `main`.
 
 ## Modelo
 ### DD/MM/AAAA — Título

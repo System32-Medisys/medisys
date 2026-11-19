@@ -33,6 +33,7 @@ Nome, descrição e status ativo ou inativo.
 - Telefone com 10 ou 11 dígitos;
 - E-mail válido;
 - Campos obrigatórios preenchidos;
-- Senha com no mínimo seis dígitos.
+- Senha inicial com no mínimo seis caracteres;
+- Senha temporária definida pelo administrador com no mínimo doze caracteres.
 
 O CPF será o login. A senha será armazenada como hash e alterada no primeiro acesso.
