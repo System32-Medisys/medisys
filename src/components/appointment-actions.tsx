@@ -39,8 +39,13 @@ export function AppointmentActions({ id, kind, status }: { id: string; kind: App
     }
   }
 
-  return <details>
-    <summary>Alterar agendamento</summary>
+  return <details className="appointment-actions">
+    <summary className="appointment-edit-toggle" aria-label="Alterar status do agendamento" title="Alterar status do agendamento">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 20h9" />
+        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z" />
+      </svg>
+    </summary>
     <form className="form" onSubmit={submit}>
       <label>Novo status
         <select required value={target} onChange={(event) => setTarget(event.target.value)}>
