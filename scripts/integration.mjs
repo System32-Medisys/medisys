@@ -206,7 +206,8 @@ try {
 } finally {
   if (server?.pid) {
     if (process.platform === 'win32') spawnSync('taskkill', ['/pid', String(server.pid), '/T', '/F'], { windowsHide: true });
-    else server.kill('SIGTERM');
+    server.kill('SIGTERM');
+    server.stdout.destroy(); server.stderr.destroy(); server.unref();
   }
   await db.$disconnect();
   mkdirSync('integration-results', { recursive: true });
