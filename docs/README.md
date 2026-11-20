@@ -28,5 +28,6 @@
 26. [Workflow de exames e resultados](21-workflow-resultados-exames.md)
 27. [Workflow de auditoria](22-workflow-auditoria.md)
 28. [Revisão de consistência](23-revisao-consistencia.md)
+29. [Testes de integração](24-testes-integracao.md)
 
 Os documentos antigos duplicados foram removidos para evitar contradições.

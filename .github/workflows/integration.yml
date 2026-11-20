@@ -1,0 +1,45 @@
+name: Integração HTTP e PostgreSQL
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: medisys
+          POSTGRES_PASSWORD: integration-only
+          POSTGRES_DB: medisys_integration
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U medisys -d medisys_integration"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      INTEGRATION_DATABASE_URL: postgresql://medisys:integration-only@127.0.0.1:5432/medisys_integration
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run test:integration
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-results
+          path: integration-results/
+          retention-days: 7
