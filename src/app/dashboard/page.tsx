@@ -2,6 +2,7 @@ import { ConsultationStatus, ExamStatus, Prisma, Role, UserStatus } from "@prism
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { DashboardAutoRefresh } from "./auto-refresh";
+import { DashboardInteractions } from "./dashboard-interactions";
 import { requirePageSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDateTime, formatStatus } from "@/lib/format";
@@ -222,6 +223,7 @@ export default async function DashboardPage({
       subtitle={`Hoje é ${todayLabel}. Veja o resumo e as prioridades do dia.`}
       userName={session.user.fullName}
     >
+      <DashboardInteractions>
       <DashboardAutoRefresh />
       <div className={styles.toolbar}>
         <nav aria-label="Selecionar período dos indicadores" className={styles.periods}>
@@ -242,7 +244,7 @@ export default async function DashboardPage({
         </nav>
         <form action="/dashboard" method="get">
           {Array.from(filterParams.entries()).map(([key, value]) => <input key={key} type="hidden" name={key} value={value} />)}
-          <button className="text-link" type="submit">Atualizar indicadores</button>
+          <button className="text-link dashboard-refresh-button" type="submit">Atualizar indicadores</button>
         </form>
       </div>
 
@@ -436,6 +438,7 @@ export default async function DashboardPage({
           </div>
         </aside>
       </div>
+      </DashboardInteractions>
     </AppShell>
   );
 }
