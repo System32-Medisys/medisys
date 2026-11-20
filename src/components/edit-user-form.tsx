@@ -43,7 +43,7 @@ export function EditUserForm({
     setLoading(true);
     setMessage(null);
     const form = new FormData(event.currentTarget);
-    const optional = (name: string) => String(form.get(name) ?? "").trim() || undefined;
+    const optional = (name: string) => String(form.get(name) ?? "").trim() || null;
     const payload = {
       cpf: String(form.get("cpf") ?? ""),
       fullName: String(form.get("fullName") ?? ""),

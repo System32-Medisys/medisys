@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { allowedStatuses, type AppointmentKind } from "@/lib/appointment-status";
 import { formatStatus } from "@/lib/format";
+import { clinicDateTimeToIso } from "@/lib/clinic-date";
 
 export function AppointmentActions({ id, kind, status }: { id: string; kind: AppointmentKind; status: string }) {
   const router = useRouter();
@@ -26,7 +27,7 @@ export function AppointmentActions({ id, kind, status }: { id: string; kind: App
         method: "PATCH", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: target, justification: requiresReason ? data.get("justification") : undefined,
-          scheduledAt: reschedule ? new Date(date + ":00-04:00").toISOString() : undefined,
+          scheduledAt: reschedule ? clinicDateTimeToIso(date) : undefined,
         }),
       });
       if (!response.ok) throw new Error((await response.json()).error ?? "Não foi possível alterar o agendamento.");

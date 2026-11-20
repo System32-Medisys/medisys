@@ -9,7 +9,8 @@ export function formatDateTime(value: Date) {
 export function formatDate(value: Date) {
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
-    timeZone: "America/Porto_Velho",
+    // Birth dates are civil dates stored at UTC midnight, not local instants.
+    timeZone: "UTC",
   }).format(value);
 }
 
