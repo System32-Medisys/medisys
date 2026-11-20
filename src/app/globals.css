@@ -102,6 +102,14 @@ th { background: #eef4f1; color: var(--muted); font-size: .7rem; text-transform:
 tbody tr:last-child td { border-bottom: 0; }
 tbody tr:hover { background: #f8fbfa; }
 .status-badge { display: inline-block; background: var(--accent); color: var(--brand-dark); padding: 6px 9px; border-radius: 999px; font-size: .74rem; text-transform: capitalize; white-space: nowrap; }
+.appointment-actions { display: inline-block; margin-left: 8px; vertical-align: middle; }
+.appointment-edit-toggle { display: inline-grid; width: 30px; height: 30px; place-items: center; border: 1px solid transparent; border-radius: 8px; color: var(--brand); cursor: pointer; list-style: none; }
+.appointment-edit-toggle::-webkit-details-marker { display: none; }
+.appointment-edit-toggle:hover, .appointment-actions[open] > .appointment-edit-toggle { background: var(--brand-soft); color: var(--brand-dark); }
+.appointment-edit-toggle:focus-visible { outline: 3px solid rgba(11,143,125,.25); outline-offset: 2px; }
+.appointment-edit-toggle svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.appointment-actions[open] { display: block; margin: 8px 0 0; }
+.appointment-actions .form { gap: 12px; margin-top: 12px; }
 .empty-state { margin: 0; padding: 32px; text-align: center; color: var(--muted); }
 .settings-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; }
 .settings-list { list-style: none; padding: 0; margin: 0; display: grid; }

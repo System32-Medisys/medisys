@@ -40,6 +40,13 @@ beforeEach(() => {
 });
 
 describe("login counter and account changes", () => {
+  it("preserves the improved login error messages when counting failures", async () => {
+    const first = await POST(request());
+    expect(await first.json()).toMatchObject({ error: "CPF ou senha incorretos. Verifique os dados e tente novamente." });
+    for (let i = 0; i < 3; i++) await POST(request());
+    const fifth = await POST(request());
+    expect(await fifth.json()).toMatchObject({ error: "Conta bloqueada após cinco tentativas." });
+  });
   it("blocks after five simultaneous incorrect passwords without lost increments", async () => {
     const responses = await Promise.all(Array.from({ length: 5 }, () => POST(request())));
     expect(responses.every((response) => response.status === 401)).toBe(true);
