@@ -2,6 +2,7 @@
 
 import { type FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { clinicDateTimeToIso } from "@/lib/clinic-date";
 import styles from "./schedule-form.module.css";
 
 type Option = { id: string; label: string };
@@ -50,9 +51,10 @@ export function ScheduleForm({
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
     const localDateTime = String(form.get("scheduledAt") ?? "");
-    const parsedDate = new Date(localDateTime);
-
-    if (!localDateTime || Number.isNaN(parsedDate.getTime())) {
+    let scheduledAt: string;
+    try {
+      scheduledAt = clinicDateTimeToIso(localDateTime);
+    } catch {
       setFieldErrors({ scheduledAt: ["Informe uma data e hora válidas."] });
       setMessage({ type: "error", text: "Corrija os campos destacados." });
       setSubmitting(false);
@@ -62,7 +64,7 @@ export function ScheduleForm({
     const payload = {
       patientId: String(form.get("patientId") ?? ""),
       [targetName]: String(form.get(targetName) ?? ""),
-      scheduledAt: parsedDate.toISOString(),
+      scheduledAt,
     };
 
     try {
@@ -136,7 +138,7 @@ export function ScheduleForm({
           </label>
 
           <label className={styles.wide}>
-            <span>Data e hora <strong aria-hidden="true">*</strong></span>
+            <span>Data e hora (Porto Velho) <strong aria-hidden="true">*</strong></span>
             <input disabled={submitting} name="scheduledAt" required type="datetime-local" {...errorProps(fieldErrors, "scheduledAt")} />
             <FieldError errors={fieldErrors} name="scheduledAt" />
           </label>

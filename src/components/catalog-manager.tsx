@@ -31,8 +31,10 @@ export function CatalogManager({
       if (!response.ok) throw new Error(result?.error ?? "Não foi possível concluir a operação.");
       setEditing(null);
       router.refresh();
+      return true;
     } catch (error) {
       window.alert(error instanceof Error ? error.message : "Não foi possível concluir a operação.");
+      return false;
     } finally {
       setLoading(false);
     }
@@ -40,12 +42,13 @@ export function CatalogManager({
 
   async function create(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    await request(baseEndpoint, "POST", {
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    const saved = await request(baseEndpoint, "POST", {
       name: String(form.get("name") ?? ""),
       ...(isExamType ? { description: String(form.get("description") ?? "") } : {}),
     });
-    event.currentTarget.reset();
+    if (saved) formElement.reset();
   }
 
   async function save(event: FormEvent<HTMLFormElement>, item: Item) {
