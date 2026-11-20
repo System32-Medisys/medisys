@@ -242,7 +242,7 @@ export default async function DashboardPage({
         </nav>
         <form action="/dashboard" method="get">
           {Array.from(filterParams.entries()).map(([key, value]) => <input key={key} type="hidden" name={key} value={value} />)}
-          <button className="text-link" type="submit">Atualizar indicadores</button>
+          <button className={`text-link ${styles.refreshButton}`} type="submit">Atualizar indicadores</button>
         </form>
       </div>
 

@@ -1,5 +1,5 @@
 .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
-.toolbar form button.text-link { color: #fff; }
+.toolbar .refreshButton { color: #fff; }
 .periods { display: inline-flex; gap: 5px; padding: 5px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
 .period, .selectedPeriod { padding: 9px 16px; border-radius: 9px; font-size: .82rem; font-weight: 700; }
 .period { color: var(--muted); }
