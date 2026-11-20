@@ -1,6 +1,7 @@
 import { Role } from "@prisma/client";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { PrefetchNavLink } from "./prefetch-nav-link";
 
 type IconName =
   | "home"
@@ -123,10 +124,10 @@ export function AppShell({
                   {items.map((item) => {
                     const active = currentPath === item.href || currentPath.startsWith(`${item.href}/`);
                     return (
-                      <Link className={active ? "nav-link active" : "nav-link"} href={item.href} key={item.href}>
+                      <PrefetchNavLink active={active} className={active ? "nav-link active" : "nav-link"} href={item.href} key={item.href}>
                         <NavIcon name={item.icon} />
                         <span>{item.label}</span>
-                      </Link>
+                      </PrefetchNavLink>
                     );
                   })}
                 </div>
